@@ -9,8 +9,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>👕 FindMyStyle</h1>
-            <p>Lade ein Bild hoch und finde ähnliche Kleidungsstücke</p>
+            <h1 class="logo">AL QAMAR STYLE</h1>
+            <p class="tagline">Search for a piece of clothing</p>
         </header>
 
         <!-- Upload Bereich -->
@@ -19,25 +19,24 @@
                 <input type="file" id="fileInput" accept="image/*" hidden>
                 <div class="upload-placeholder">
                     <div class="upload-icon">📸</div>
-                    <p>Bild hier ablegen oder klicken zum Hochladen</p>
-                    <small>Unterstützt: JPG, PNG, WebP</small>
+                    <p class="upload-text">Tap to upload or take a photo</p>
                 </div>
             </div>
             
-            <button id="cameraBtn" class="btn-secondary">📷 Kamera öffnen</button>
+            <button class="start-btn" id="startBtn">Start</button>
         </div>
 
         <!-- Ergebnisse Bereich -->
         <div id="results" class="results-section">
             <div class="loading" id="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>Analysiere Bild...</p>
+                <p>Searching for matches...</p>
             </div>
             <div id="resultsContent"></div>
         </div>
 
         <footer>
-            <p>Mit ❤️ erstellt für Fashion-Liebhaber</p>
+            <p>Find your style with AI</p>
         </footer>
     </div>
 
