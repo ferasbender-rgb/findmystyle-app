@@ -1,42 +1,18 @@
-// Hier deinen NEUEN API Key eintragen
-const API_KEY = 'AIzaSyDHUefeQk5cRcMGd5xT6tKqGUEnw8IOC2Y';
-
-// Elemente
+// Demo-KI für Fashion-Erkennung
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
-const cameraBtn = document.getElementById('cameraBtn');
-const loadingElement = document.getElementById('loading');
 const resultsContent = document.getElementById('resultsContent');
+const loadingElement = document.getElementById('loading');
 
 // Event Listener
 uploadArea.addEventListener('click', () => fileInput.click());
-
-uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.style.background = '#f0ebff';
-});
-
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.background = '#f8f7ff';
-});
-
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.style.background = '#f8f7ff';
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageFile(file);
-});
 
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) handleImageFile(file);
 });
 
-cameraBtn.addEventListener('click', () => {
-    alert('Kamera-Funktion kommt in der nächsten Version! 📸');
-});
-
-// Bild verarbeiten
+// Bild "analysieren" - Demo Version
 async function handleImageFile(file) {
     if (!file.type.startsWith('image/')) {
         showError('Bitte wähle eine Bilddatei aus');
@@ -45,135 +21,93 @@ async function handleImageFile(file) {
 
     showLoading();
     
-    try {
-        const base64Image = await convertToBase64(file);
-        const analysisResults = await analyzeImageWithGoogleVision(base64Image);
-        displayResults(analysisResults);
-    } catch (error) {
-        console.error('Fehler:', error);
-        showError('Fehler bei der Bildanalyse. Bitte versuche es erneut.');
-    } finally {
-        hideLoading();
-    }
+    // 2 Sekunden warten für realistische Demo
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Zufällige Kleidungs-Erkennung
+    const detectedItems = generateFashionDetection();
+    displayResults(detectedItems);
+    hideLoading();
 }
 
-// Bild zu Base64 konvertieren
-function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-        };
-        reader.onerror = error => reject(error);
-    });
-}
-
-// Google Vision API aufrufen
-async function analyzeImageWithGoogleVision(base64Image) {
-    const requestData = {
-        requests: [
-            {
-                image: { content: base64Image },
-                features: [
-                    { type: 'LABEL_DETECTION', maxResults: 8 },
-                    { type: 'OBJECT_LOCALIZATION', maxResults: 5 }
-                ]
-            }
-        ]
-    };
-
-    const response = await fetch(
-        `https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData)
-        }
-    );
-
-    if (!response.ok) {
-        throw new Error(`API Fehler: ${response.status}`);
+// Demo-KI: Generiert zufällige Fashion-Ergebnisse
+function generateFashionDetection() {
+    const clothingTypes = [
+        'T-Shirt', 'Jeans', 'Kleid', 'Bluse', 'Hose', 'Jacke', 
+        'Pullover', 'Rock', 'Shorts', 'Blazer', 'Hemd', 'Schuhe'
+    ];
+    
+    const colors = ['Schwarz', 'Weiß', 'Blau', 'Rot', 'Grün', 'Grau', 'Braun', 'Beige'];
+    const materials = ['Baumwolle', 'Denim', 'Wolle', 'Seide', 'Leinen', 'Polyester'];
+    
+    const results = [];
+    const numItems = Math.floor(Math.random() * 3) + 2; // 2-4 Items
+    
+    for (let i = 0; i < numItems; i++) {
+        const type = clothingTypes[Math.floor(Math.random() * clothingTypes.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const material = materials[Math.floor(Math.random() * materials.length)];
+        const confidence = Math.floor(Math.random() * 30) + 70; // 70-99%
+        
+        results.push({
+            type: type,
+            color: color,
+            material: material,
+            confidence: confidence
+        });
     }
-
-    return await response.json();
+    
+    return results;
 }
 
 // Ergebnisse anzeigen
-function displayResults(data) {
-    const labels = data.responses[0]?.labelAnnotations || [];
-    const objects = data.responses[0]?.localizedObjectAnnotations || [];
+function displayResults(items) {
+    let html = '<h3>👕 Erkannte Kleidungsstücke:</h3>';
+    html += '<div class="results-grid">';
     
-    let html = '';
-
-    // Erkannte Objekte anzeigen
-    if (objects.length > 0) {
-        html += '<h3>👕 Erkannte Kleidungsstücke:</h3>';
-        html += '<div class="results-grid">';
-        
-        objects.forEach(obj => {
-            const confidence = Math.round(obj.score * 100);
-            if (confidence > 50) { // Nur Ergebnisse mit hoher Genauigkeit
-                html += `
-                    <div class="result-item">
-                        <strong>${obj.name}</strong>
-                        <div class="result-confidence">${confidence}% Übereinstimmung</div>
-                    </div>
-                `;
-            }
-        });
-        html += '</div>';
-    }
-
-    // Labels als Fallback
-    if (html === '' && labels.length > 0) {
-        html += '<h3>🔍 Erkannte Elemente:</h3>';
-        html += '<div class="results-grid">';
-        
-        labels.forEach(label => {
-            const confidence = Math.round(label.score * 100);
-            if (confidence > 70) {
-                html += `
-                    <div class="result-item">
-                        <strong>${label.description}</strong>
-                        <div class="result-confidence">${confidence}% sicher</div>
-                    </div>
-                `;
-            }
-        });
-        html += '</div>';
-    }
-
-    // Shop Vorschläge
-    html += `
-        <div class="shop-suggestions">
-            <h3>🛍️ Verfügbar in diesen Shops:</h3>
-            <div class="shop-item">
-                <div class="shop-icon">👕</div>
-                <div>
-                    <strong>Zalando</strong>
-                    <p>Ähnliche Styles verfügbar</p>
+    items.forEach(item => {
+        html += `
+            <div class="result-item">
+                <strong>${item.type}</strong>
+                <div class="result-details">
+                    Farbe: ${item.color} | Material: ${item.material}
                 </div>
+                <div class="result-confidence">${item.confidence}% Übereinstimmung</div>
             </div>
-            <div class="shop-item">
-                <div class="shop-icon">👖</div>
-                <div>
-                    <strong>About You</strong>
-                    <p>Vergleichbare Modelle</p>
-                </div>
-            </div>
-            <div class="shop-item">
-                <div class="shop-icon">👗</div>
-                <div>
-                    <strong>H&M</strong>
-                    <p>Budget-freundliche Alternativen</p>
-                </div>
-            </div>
-        </div>
-    `;
-
+        `;
+    });
+    
+    html += '</div>';
+    html += generateShopSuggestions();
+    
     resultsContent.innerHTML = html;
+}
+
+// Shop-Vorschläge generieren
+function generateShopSuggestions() {
+    const shops = [
+        { name: 'Zalando', icon: '👕', description: 'Ähnliche Styles verfügbar' },
+        { name: 'About You', icon: '👖', description: 'Vergleichbare Modelle' },
+        { name: 'H&M', icon: '👗', description: 'Budget-freundliche Alternativen' },
+        { name: 'ASOS', icon: '🛍️', description: 'Internationale Trends' }
+    ];
+    
+    let html = '<div class="shop-suggestions"><h3>🛍️ Verfügbar in diesen Shops:</h3>';
+    
+    shops.forEach(shop => {
+        html += `
+            <div class="shop-item">
+                <div class="shop-icon">${shop.icon}</div>
+                <div>
+                    <strong>${shop.name}</strong>
+                    <p>${shop.description}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    return html;
 }
 
 // Loading States
@@ -189,3 +123,20 @@ function hideLoading() {
 function showError(message) {
     resultsContent.innerHTML = `<div class="error">${message}</div>`;
 }
+
+// Drag & Drop Funktion
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '#f0ebff';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.background = '#f8f7ff';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = '#f8f7ff';
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageFile(file);
+});
