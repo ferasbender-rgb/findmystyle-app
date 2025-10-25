@@ -1,5 +1,5 @@
 // Hier deinen NEUEN API Key eintragen
-const API_KEY = 'AIzaSyCftvazCWIPTach3qtGd1pSk99tXqZaj08';
+const API_KEY = 'AIzaSyDHUefeQk5cRcMGd5xT6tKqGUEnw8IOC2Y';
 
 // Elemente
 const uploadArea = document.getElementById('uploadArea');
