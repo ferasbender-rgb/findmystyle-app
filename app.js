@@ -1,11 +1,13 @@
-// Demo-KI für Fashion-Erkennung
+// Demo-KI für Fashion-Erkennung - AL QAMAR STYLE Version
 const uploadArea = document.getElementById('uploadArea');
 const fileInput = document.getElementById('fileInput');
+const startBtn = document.getElementById('startBtn');
 const resultsContent = document.getElementById('resultsContent');
 const loadingElement = document.getElementById('loading');
 
 // Event Listener
 uploadArea.addEventListener('click', () => fileInput.click());
+startBtn.addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -15,7 +17,7 @@ fileInput.addEventListener('change', (e) => {
 // Bild "analysieren" - Demo Version
 async function handleImageFile(file) {
     if (!file.type.startsWith('image/')) {
-        showError('Bitte wähle eine Bilddatei aus');
+        showError('Please select an image file');
         return;
     }
 
@@ -33,12 +35,12 @@ async function handleImageFile(file) {
 // Demo-KI: Generiert zufällige Fashion-Ergebnisse
 function generateFashionDetection() {
     const clothingTypes = [
-        'T-Shirt', 'Jeans', 'Kleid', 'Bluse', 'Hose', 'Jacke', 
-        'Pullover', 'Rock', 'Shorts', 'Blazer', 'Hemd', 'Schuhe'
+        'Blouse', 'Shirt', 'Dress', 'Jeans', 'Pants', 'Jacket', 
+        'Sweater', 'Skirt', 'Shorts', 'Blazer', 'Coat', 'Shoes'
     ];
     
-    const colors = ['Schwarz', 'Weiß', 'Blau', 'Rot', 'Grün', 'Grau', 'Braun', 'Beige'];
-    const materials = ['Baumwolle', 'Denim', 'Wolle', 'Seide', 'Leinen', 'Polyester'];
+    const colors = ['White', 'Black', 'Blue', 'Red', 'Green', 'Gray', 'Brown', 'Beige'];
+    const materials = ['Cotton', 'Denim', 'Wool', 'Silk', 'Linen', 'Polyester'];
     
     const results = [];
     const numItems = Math.floor(Math.random() * 3) + 2; // 2-4 Items
@@ -60,54 +62,55 @@ function generateFashionDetection() {
     return results;
 }
 
-// Ergebnisse anzeigen
+// Ergebnisse im neuen Design anzeigen
 function displayResults(items) {
-    let html = '<h3>👕 Erkannte Kleidungsstücke:</h3>';
-    html += '<div class="results-grid">';
+    let html = '';
     
-    items.forEach(item => {
+    // Haupt-Ergebnis (erstes Item prominent)
+    if (items.length > 0) {
+        const mainItem = items[0];
         html += `
             <div class="result-item">
-                <strong>${item.type}</strong>
-                <div class="result-details">
-                    Farbe: ${item.color} | Material: ${item.material}
+                <div class="result-header">
+                    <div class="result-title">${mainItem.color} ${mainItem.type}</div>
+                    <div class="result-type">Exact match</div>
                 </div>
-                <div class="result-confidence">${item.confidence}% Übereinstimmung</div>
+                <div class="result-matches">
+                    <div class="match-item">
+                        <span class="match-company">Zalando</span>
+                        <span class="match-price">€${Math.floor(Math.random() * 30) + 30}</span>
+                    </div>
+                    <div class="match-item">
+                        <span class="match-company">H&M</span>
+                        <span class="match-price">€${Math.floor(Math.random() * 20) + 20}</span>
+                    </div>
+                    <div class="match-item">
+                        <span class="match-company">About You</span>
+                        <span class="match-price">€${Math.floor(Math.random() * 40) + 25}</span>
+                    </div>
+                </div>
             </div>
         `;
-    });
-    
-    html += '</div>';
-    html += generateShopSuggestions();
+    }
+
+    // Weitere Ergebnisse
+    if (items.length > 1) {
+        html += '<h3 style="margin: 25px 0 15px; font-size: 18px;">Similar items</h3>';
+        
+        for (let i = 1; i < items.length; i++) {
+            const item = items[i];
+            html += `
+                <div class="result-item">
+                    <div class="result-header">
+                        <div class="result-title">${item.color} ${item.type}</div>
+                        <div class="result-type">${item.confidence}% match</div>
+                    </div>
+                </div>
+            `;
+        }
+    }
     
     resultsContent.innerHTML = html;
-}
-
-// Shop-Vorschläge generieren
-function generateShopSuggestions() {
-    const shops = [
-        { name: 'Zalando', icon: '👕', description: 'Ähnliche Styles verfügbar' },
-        { name: 'About You', icon: '👖', description: 'Vergleichbare Modelle' },
-        { name: 'H&M', icon: '👗', description: 'Budget-freundliche Alternativen' },
-        { name: 'ASOS', icon: '🛍️', description: 'Internationale Trends' }
-    ];
-    
-    let html = '<div class="shop-suggestions"><h3>🛍️ Verfügbar in diesen Shops:</h3>';
-    
-    shops.forEach(shop => {
-        html += `
-            <div class="shop-item">
-                <div class="shop-icon">${shop.icon}</div>
-                <div>
-                    <strong>${shop.name}</strong>
-                    <p>${shop.description}</p>
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    return html;
 }
 
 // Loading States
@@ -131,12 +134,12 @@ uploadArea.addEventListener('dragover', (e) => {
 });
 
 uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.background = '#f8f7ff';
+    uploadArea.style.background = '#fafafa';
 });
 
 uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
-    uploadArea.style.background = '#f8f7ff';
+    uploadArea.style.background = '#fafafa';
     const file = e.dataTransfer.files[0];
     if (file) handleImageFile(file);
 });
