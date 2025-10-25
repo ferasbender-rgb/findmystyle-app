@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyStyle - Klamotten Finder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👕 FindMyStyle</h1>
+            <p>Lade ein Bild hoch und finde ähnliche Kleidungsstücke</p>
+        </header>
+
+        <!-- Upload Bereich -->
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-placeholder">
+                    <div class="upload-icon">📸</div>
+                    <p>Bild hier ablegen oder klicken zum Hochladen</p>
+                    <small>Unterstützt: JPG, PNG, WebP</small>
+                </div>
+            </div>
+            
+            <button id="cameraBtn" class="btn-secondary">📷 Kamera öffnen</button>
+        </div>
+
+        <!-- Ergebnisse Bereich -->
+        <div id="results" class="results-section">
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analysiere Bild...</p>
+            </div>
+            <div id="resultsContent"></div>
+        </div>
+
+        <footer>
+            <p>Mit ❤️ erstellt für Fashion-Liebhaber</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
