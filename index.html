@@ -29,16 +29,30 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        input[type="file"] {
+            width: 100%;
+        }
+        input[type="text"] {
+            width: 300px;
+        }
         button {
             background-color: #007cba;
             color: white;
             cursor: pointer;
+            border: none;
         }
         button:hover {
             background-color: #005a87;
         }
         .hidden {
             display: none;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
         }
     </style>
 </head>
@@ -97,21 +111,21 @@
 
         // Marken aus erkanntem Text extrahieren
         function extractBrands(text) {
-            const brands = ['Nike', 'Adidas', 'Puma', 'H&M', 'Zara', 'G-Star', 'Tommy Hilfiger', 'Calvin Klein'];
+            const brands = ['Nike', 'Adidas', 'Puma', 'H&M', 'Zara', 'G-Star', 'Tommy Hilfiger', 'Calvin Klein', 'G-Star'];
             const foundBrands = brands.filter(brand => 
                 text.toLowerCase().includes(brand.toLowerCase())
             );
             return foundBrands.length > 0 ? foundBrands[0] : 'unbekannt';
         }
 
-        // Daten an Google Sheets senden - SIMPLE VERSION
+        // Daten an Google Sheets senden - FORMULAR METHODE
         function saveToGoogleSheets(data) {
             console.log('📧 Sende an Google Sheets:', data);
             
-            // Erstelle ein Bild-Formular das die Daten sendet
+            // Erstelle ein verstecktes Formular für den POST Request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = 'https://script.google.com/macros/s/AKfycbwRzO5cpsrrX2YrK2GQmn643Ddc68JXMqBKjK5WSM5P79MGg_vjnQme99Q1WxmQ1m4sGg/exec';
+            form.action = 'https://script.google.com/macros/s/AKfycbwBSw-5Em1bQMho60i_33MvReyyllVLuaZxb9G82yX2-OTstouYdTfWrS7qtJZpDjjSYA/exec';
             form.target = 'hiddenFrame';
             form.style.display = 'none';
             
@@ -132,7 +146,7 @@
             return true;
         }
 
-        // Training Data sammeln - KEINE FETCH FEHLER MEHR
+        // Training Data sammeln
         function collectTrainingData(originalData, userCorrection) {
             const trainingData = {
                 timestamp: new Date().toISOString(),
@@ -149,7 +163,7 @@
             saveToGoogleSheets(trainingData);
             
             // Zeige sofort Erfolgsmeldung
-            alert('✅ Feedback erfolgreich gespeichert!');
+            alert('✅ Feedback erfolgreich gespeichert! Die Daten wurden an Google Sheets übertragen.');
             
             // UI zurücksetzen
             document.getElementById('correctionSection').style.display = 'none';
@@ -180,6 +194,7 @@
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
             img.style.maxWidth = '300px';
+            img.style.border = '1px solid #ccc';
             preview.appendChild(img);
 
             // OCR durchführen
@@ -196,6 +211,7 @@
                 // Korrektur-Sektion anzeigen
                 correctionSection.style.display = 'block';
                 correctionInput.value = detectedBrand !== 'unbekannt' ? detectedBrand : '';
+                correctionInput.focus();
                 
                 // Aktuelle Daten speichern für spätere Korrektur
                 window.currentOCRData = {
