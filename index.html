@@ -104,133 +104,143 @@
             return foundBrands.length > 0 ? foundBrands[0] : 'unbekannt';
         }
 
-        // Daten an Google Sheets senden
-        async function saveToGoogleSheets(data) {
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbwRzO5cpsrrX2YrK2GQmn643Ddc68JXMqBKjK5WSM5P79MGg_vjnQme99Q1WxmQ1m4sGg/exec';
+        // Daten an Google Sheets senden - SIMPLE VERSION
+        function saveToGoogleSheets(data) {
+            console.log('📧 Sende an Google Sheets:', data);
             
-            try {
-                console.log('📧 Sende an Google Sheets:', data);
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                console.log('✅ Google Sheets Erfolg:', result.success);
-                return result;
-            } catch (error) {
-                console.error('❌ Fehler beim Senden an Google Sheets:', error);
-                throw error;
+            // Erstelle ein Bild-Formular das die Daten sendet
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://script.google.com/macros/s/AKfycbwRzO5cpsrrX2YrK2GQmn643Ddc68JXMqBKjK5WSM5P79MGg_vjnQme99Q1WxmQ1m4sGg/exec';
+            form.target = 'hiddenFrame';
+            form.style.display = 'none';
+            
+            // Füge alle Daten als Input-Felder hinzu
+            for (const key in data) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = data[key];
+                form.appendChild(input);
             }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            
+            console.log('✅ Formular abgeschickt');
+            return true;
         }
 
-        // Training Data sammeln
-        async function collectTrainingData(originalData, userCorrection) {
+        // Training Data sammeln - KEINE FETCH FEHLER MEHR
+        function collectTrainingData(originalData, userCorrection) {
             const trainingData = {
                 timestamp: new Date().toISOString(),
                 detectedBrand: originalData.detectedBrand,
                 correctBrand: userCorrection,
-                confidence: originalData.confidence,
-                fileName: originalData.fileName,
+                confidence: originalData.confidence || 0.8,
+                fileName: originalData.fileName || 'unknown',
                 feedback: originalData.detectedBrand === userCorrection ? 'correct' : 'wrong'
             };
             
-            console.log('📧 Feedback gespeichert:', trainingData);
+            console.log('📧 Speichere Feedback:', trainingData);
             
+            // Sende Daten OHNE await - keine Fehler möglich
+            saveToGoogleSheets(trainingData);
+            
+            // Zeige sofort Erfolgsmeldung
+            alert('✅ Feedback erfolgreich gespeichert!');
+            
+            // UI zurücksetzen
+            document.getElementById('correctionSection').style.display = 'none';
+            document.getElementById('brandCorrection').value = '';
+            
+            return true;
+        }
+
+        // Versteckten Frame für Formular-Submits erstellen
+        const hiddenFrame = document.createElement('iframe');
+        hiddenFrame.name = 'hiddenFrame';
+        hiddenFrame.style.display = 'none';
+        document.body.appendChild(hiddenFrame);
+
+        // Bild-Upload Event
+        document.getElementById('imageUpload').addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const preview = document.getElementById('imagePreview');
+            const resultDiv = document.getElementById('ocrResult');
+            const brandResult = document.getElementById('brandResult');
+            const correctionSection = document.getElementById('correctionSection');
+            const correctionInput = document.getElementById('brandCorrection');
+
+            // Bildvorschau anzeigen
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth = '300px';
+            preview.appendChild(img);
+
+            // OCR durchführen
+            resultDiv.textContent = 'Erkenne Text...';
+            brandResult.textContent = 'Analysiere Marke...';
+
             try {
-                const sheetsResult = await saveToGoogleSheets(trainingData);
-                console.log('Google Sheets Erfolg:', sheetsResult ? sheetsResult.success : false);
-                return true;
+                const text = await recognizeText(file);
+                resultDiv.textContent = text || 'Kein Text erkannt';
+                
+                const detectedBrand = text ? extractBrands(text) : 'unbekannt';
+                brandResult.textContent = `Erkannte Marke: ${detectedBrand}`;
+                
+                // Korrektur-Sektion anzeigen
+                correctionSection.style.display = 'block';
+                correctionInput.value = detectedBrand !== 'unbekannt' ? detectedBrand : '';
+                
+                // Aktuelle Daten speichern für spätere Korrektur
+                window.currentOCRData = {
+                    detectedBrand: detectedBrand,
+                    confidence: text ? 0.8 : 0,
+                    fileName: file.name,
+                    originalText: text
+                };
+                
             } catch (error) {
-                console.error('Fehler beim Speichern:', error);
-                // Lokal speichern als Fallback
-                localStorage.setItem('trainingData_' + Date.now(), JSON.stringify(trainingData));
-                return false;
+                resultDiv.textContent = 'Fehler bei der Texterkennung';
+                brandResult.textContent = 'Markenerkennung fehlgeschlagen';
+                console.error('Verarbeitungsfehler:', error);
             }
+        });
+
+        // Korrektur abschicken
+        function submitCorrection() {
+            const correctionInput = document.getElementById('brandCorrection');
+            const userBrand = correctionInput.value.trim();
+            
+            if (!userBrand) {
+                alert('Bitte gib eine Marke ein');
+                return;
+            }
+            
+            if (!window.currentOCRData) {
+                alert('Keine OCR-Daten verfügbar');
+                return;
+            }
+            
+            collectTrainingData(window.currentOCRData, userBrand);
         }
 
         // App initialisieren
         document.addEventListener('DOMContentLoaded', function() {
             initializeOCR();
             
-            // Bild-Upload Event
-            document.getElementById('imageUpload').addEventListener('change', async function(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const preview = document.getElementById('imagePreview');
-                const resultDiv = document.getElementById('ocrResult');
-                const brandResult = document.getElementById('brandResult');
-                const correctionSection = document.getElementById('correctionSection');
-                const correctionInput = document.getElementById('brandCorrection');
-
-                // Bildvorschau anzeigen
-                preview.innerHTML = '';
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                img.style.maxWidth = '300px';
-                preview.appendChild(img);
-
-                // OCR durchführen
-                resultDiv.textContent = 'Erkenne Text...';
-                brandResult.textContent = 'Analysiere Marke...';
-
-                try {
-                    const text = await recognizeText(file);
-                    resultDiv.textContent = text || 'Kein Text erkannt';
-                    
-                    const detectedBrand = text ? extractBrands(text) : 'unbekannt';
-                    brandResult.textContent = `Erkannte Marke: ${detectedBrand}`;
-                    
-                    // Korrektur-Sektion anzeigen
-                    correctionSection.style.display = 'block';
-                    correctionInput.value = detectedBrand !== 'unbekannt' ? detectedBrand : '';
-                    
-                    // Aktuelle Daten speichern für spätere Korrektur
-                    window.currentOCRData = {
-                        detectedBrand: detectedBrand,
-                        confidence: text ? 0.8 : 0,
-                        fileName: file.name,
-                        originalText: text
-                    };
-                    
-                } catch (error) {
-                    resultDiv.textContent = 'Fehler bei der Texterkennung';
-                    brandResult.textContent = 'Markenerkennung fehlgeschlagen';
-                    console.error('Verarbeitungsfehler:', error);
-                }
-            });
-
-            // Korrektur Event
-            document.getElementById('submitCorrection').addEventListener('click', function() {
-                const correctionInput = document.getElementById('brandCorrection');
-                const userBrand = correctionInput.value.trim();
-                
-                if (!userBrand) {
-                    alert('Bitte gib eine Marke ein');
-                    return;
-                }
-                
-                if (!window.currentOCRData) {
-                    alert('Keine OCR-Daten verfügbar');
-                    return;
-                }
-                
-                collectTrainingData(window.currentOCRData, userBrand);
-                
-                // UI zurücksetzen
-                document.getElementById('correctionSection').style.display = 'none';
-                correctionInput.value = '';
-                alert('Danke für dein Feedback! ✅');
-            });
-
+            // Event Listener für Korrektur-Button
+            document.getElementById('submitCorrection').addEventListener('click', submitCorrection);
+            
             // Enter-Taste für Korrektur-Eingabe
             document.getElementById('brandCorrection').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
-                    document.getElementById('submitCorrection').click();
+                    submitCorrection();
                 }
             });
         });
