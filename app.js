@@ -63,8 +63,8 @@ const ENHANCED_CLOTHING_BRANDS = {
 };
 
 // === DIREKTE GOOGLE SHEETS KONFIGURATION ===
-// 🚀 DEINE NEUE WEB-APP URL NACH NEUER BEREITSTELLUNG:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/DEINE_NEUE_URL_HIER/exec';
+// 🚀 AKTUELLE WEB-APP URL:
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7nBtTTp88SD-U4hrUeutr0OmLTnOb1nvrOIP3UFEcmsViXnsir9tbkukh3oORZQThhw/exec';
 
 // DOM Elemente
 const imageInput = document.getElementById('imageInput');
