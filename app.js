@@ -37,27 +37,34 @@ function extractBrands(text) {
     return foundBrands.length > 0 ? foundBrands[0] : 'unbekannt';
 }
 
-// Daten an Google Sheets senden
+// Daten an Google Sheets senden (Formular-Methode)
 async function saveToGoogleSheets(data) {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwRzO5cpsrrX2YrK2GQmn643Ddc68JXMqBKjK5WSM5P79MGg_vjnQme99Q1WxmQ1m4sGg/exec';
     
-    try {
-        console.log('📧 Sende an Google Sheets:', data);
-        const response = await fetch(scriptURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        console.log('✅ Google Sheets Erfolg:', result.success);
-        return result;
-    } catch (error) {
-        console.error('❌ Fehler beim Senden an Google Sheets:', error);
-        throw error;
-    }
+    console.log('📧 Sende an Google Sheets:', data);
+    
+    // Erstelle ein versteckes Formular für den POST Request
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = scriptURL;
+    form.target = '_blank'; // Öffnet in neuem Tab (vermeidet CORS)
+    form.style.display = 'none';
+    
+    // Füge Daten als hidden inputs hinzu
+    Object.keys(data).forEach(key => {
+        const input = document.createElement('input');
+        input.name = key;
+        input.value = data[key];
+        form.appendChild(input);
+    });
+    
+    // Füge Formular zum DOM hinzu und sende ab
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    console.log('✅ Daten gesendet via Formular');
+    return { success: true };
 }
 
 // Training Data sammeln
@@ -66,21 +73,24 @@ async function collectTrainingData(originalData, userCorrection) {
         timestamp: new Date().toISOString(),
         detectedBrand: originalData.detectedBrand,
         correctBrand: userCorrection,
-        confidence: originalData.confidence,
-        fileName: originalData.fileName,
+        confidence: originalData.confidence || 0.8,
+        fileName: originalData.fileName || 'unknown',
         feedback: originalData.detectedBrand === userCorrection ? 'correct' : 'wrong'
     };
     
     console.log('📧 Feedback gespeichert:', trainingData);
     
-    // Immer als Erfolg anzeigen, da wir CORS ignorieren
-    const sheetsResult = await saveToGoogleSheets(trainingData);
-    console.log('Google Sheets Erfolg:', sheetsResult.success);
+    // Sende Daten (kein await nötig)
+    saveToGoogleSheets(trainingData);
     
-    // Erfolgsmeldung anzeigen
-    alert('✅ Feedback erfolgreich gespeichert!');
+    // Erfolgsmeldung sofort anzeigen
+    alert('✅ Feedback erfolgreich gespeichert! Die Daten werden an Google Sheets übertragen.');
+    
+    // UI zurücksetzen
+    document.getElementById('correctionSection').style.display = 'none';
+    document.getElementById('brandCorrection').value = '';
+    
     return true;
-}
 }
 
 // Bild-Upload verarbeiten
@@ -147,11 +157,6 @@ function submitCorrection() {
     }
     
     collectTrainingData(window.currentOCRData, userBrand);
-    
-    // UI zurücksetzen
-    document.getElementById('correctionSection').style.display = 'none';
-    correctionInput.value = '';
-    alert('Danke für dein Feedback! ✅');
 }
 
 // App initialisieren
