@@ -3,40 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FindMyStyle - Klamotten Finder</title>
+    <title>Kleidungsmarken Erkennung</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="logo">AL QAMAR STYLE</h1>
-            <p class="tagline">Search for a piece of clothing</p>
+            <h1>👕 Kleidungsmarken Erkennung</h1>
+            <p>Lade ein Bild hoch um die Marke automatisch zu erkennen</p>
         </header>
 
-        <!-- Upload Bereich -->
-        <div class="upload-section">
-            <div class="upload-area" id="uploadArea">
-                <input type="file" id="fileInput" accept="image/*" hidden>
-                <div class="upload-placeholder">
-                    <div class="upload-icon">📸</div>
-                    <p class="upload-text">Tap to upload or take a photo</p>
+        <main>
+            <!-- Bild Upload Bereich -->
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <span class="upload-icon">📁</span>
+                        <p>Bild hier ablegen oder klicken zum Auswählen</p>
+                        <small>Unterstützt: JPG, PNG, WebP</small>
+                    </div>
                 </div>
             </div>
-            
-            <button class="start-btn" id="startBtn">Start</button>
-        </div>
 
-        <!-- Ergebnisse Bereich -->
-        <div id="results" class="results-section">
-            <div class="loading" id="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p>Searching for matches...</p>
+            <!-- Vorschau Bereich -->
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h3>Bild Vorschau</h3>
+                <div class="preview-container">
+                    <img id="imagePreview" src="#" alt="Vorschau">
+                </div>
             </div>
-            <div id="resultsContent"></div>
-        </div>
+
+            <!-- Markenerkennungs-Bereich -->
+            <div class="brand-detection-section">
+                <h3>🔍 Markenerkennung</h3>
+                <div id="brandResult" class="brand-result">
+                    <p>Lade ein Bild hoch um die Marke zu erkennen</p>
+                </div>
+            </div>
+
+            <!-- Ergebnisse Bereich -->
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h3>📊 Ergebnisse</h3>
+                <div id="resultsContent"></div>
+            </div>
+        </main>
 
         <footer>
-            <p>Find your style with AI</p>
+            <p>Einfache Kleidungsmarken Erkennung</p>
         </footer>
     </div>
 
