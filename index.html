@@ -4,72 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kleidungsmarken Erkennung</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-section, .result-section, .correction-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        #imagePreview img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+        input[type="file"], input[type="text"], button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005a87;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>👕 Kleidungsmarken Erkennung</h1>
-            <p>Lade ein Bild hoch um die Marke automatisch zu erkennen</p>
-        </header>
-
-        <main>
-            <!-- Bild Upload Bereich -->
-            <div class="upload-section">
-                <div class="upload-box" id="uploadBox">
-                    <input type="file" id="imageInput" accept="image/*">
-                    <div class="upload-content">
-                        <span class="upload-icon">📁</span>
-                        <p>Bild hier ablegen oder klicken zum Auswählen</p>
-                        <small>Unterstützt: JPG, PNG, WebP</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vorschau Bereich -->
-            <div class="preview-section" id="previewSection" style="display: none;">
-                <h3>Bild Vorschau</h3>
-                <div class="preview-container">
-                    <img id="imagePreview" src="#" alt="Vorschau">
-                </div>
-            </div>
-
-            <!-- Markenerkennungs-Bereich -->
-            <div class="brand-detection-section">
-                <h3>🔍 Markenerkennung</h3>
-                <div id="brandResult" class="brand-result">
-                    <p>Lade ein Bild hoch um die Marke zu erkennen</p>
-                </div>
-                <!-- Feedback Bereich -->
-                <div id="feedbackSection" style="display: none;">
-                    <div class="feedback-buttons">
-                        <small>War diese Erkennung korrekt?</small>
-                        <div class="button-group">
-                            <button onclick="handleFeedback('correct')" class="feedback-btn correct">✅ Ja</button>
-                            <button onclick="handleFeedback('wrong')" class="feedback-btn wrong">❌ Nein</button>
-                        </div>
-                        <div id="correctionSection" style="display: none; margin-top: 10px;">
-                            <input type="text" id="correctBrandInput" placeholder="Welche Marke war es wirklich?">
-                            <button onclick="submitCorrection()" class="feedback-btn submit">Korrektur senden</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ergebnisse Bereich -->
-            <div class="results-section" id="resultsSection" style="display: none;">
-                <h3>📊 Ergebnisse</h3>
-                <div id="resultsContent"></div>
-            </div>
-        </main>
-
-        <footer>
-            <p>Einfache Kleidungsmarken Erkennung</p>
-        </footer>
+    <h1>🧥 Kleidungsmarken Erkennung</h1>
+    
+    <div class="upload-section">
+        <h3>1. Bild hochladen</h3>
+        <input type="file" id="imageUpload" accept="image/*">
+        <div id="imagePreview"></div>
+    </div>
+    
+    <div class="result-section">
+        <h3>2. Erkennungsergebnis</h3>
+        <div id="ocrResult">Warte auf Bild...</div>
+        <div id="brandResult"></div>
+    </div>
+    
+    <div id="correctionSection" class="correction-section hidden">
+        <h3>3. Korrektur (falls nötig)</h3>
+        <p>Korrektur der erkannten Marke:</p>
+        <input type="text" id="brandCorrection" placeholder="Richtige Marke eingeben...">
+        <button id="submitCorrection">Korrektur speichern</button>
     </div>
 
-    <!-- Tesseract.js für kostenlose OCR -->
-    <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
