@@ -249,26 +249,25 @@ async function detectBrandFromImage(imageFile) {
 }
 
 // === DIREKTE GOOGLE SHEETS INTEGRATION ===
-async function saveToGoogleSheets(feedbackData) {
-    try {
-        console.log('📤 Sende an Google Sheets:', feedbackData);
-        
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(feedbackData)
-        });
-        
-        const result = await response.text();
-        console.log('✅ Google Sheets Antwort:', result);
-        return true;
-        
-    } catch (error) {
-        console.error('❌ Fehler beim Senden an Google Sheets:', error);
-        return false;
-    }
+async function saveToGoogleSheets(data) {
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbwRzO5cpsrrX2YrK2GQmn643Ddc68JXMqBKjK5WSM5P79MGg_vjnQme99Q1WxmQ1m4sGg/exec';
+  
+  try {
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await response.json();
+    console.log('✅ Google Sheets Erfolg:', result.success);
+    return result;
+  } catch (error) {
+    console.error('❌ Fehler beim Senden an Google Sheets:', error);
+    throw error;
+  }
 }
 
 // === FEEDBACK-SYSTEM ===
