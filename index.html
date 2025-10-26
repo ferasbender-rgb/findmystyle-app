@@ -47,6 +47,13 @@
         .hidden {
             display: none;
         }
+        #dataOutput {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
@@ -71,9 +78,17 @@
         <button id="submitCorrection">Korrektur speichern</button>
     </div>
 
+    <div id="dataSection" class="result-section hidden">
+        <h3>📊 Gesammelte Daten (Kopiere diese in dein Google Sheet)</h3>
+        <div id="dataOutput"></div>
+        <button onclick="copyToClipboard()">Daten kopieren</button>
+        <button onclick="clearData()">Daten löschen</button>
+    </div>
+
     <script>
         // Tesseract.js Worker
         let worker;
+        let collectedData = [];
 
         // Initialisiere Tesseract OCR
         async function initializeOCR() {
@@ -111,35 +126,7 @@
             return foundBrands.length > 0 ? foundBrands[0] : 'unbekannt';
         }
 
-        // Daten an Google Sheets senden - FORMULAR METHODE
-        function saveToGoogleSheets(data) {
-            console.log('📧 Sende an Google Sheets:', data);
-            
-            // 🔥 NEUE URL EINGESETZT 🔥
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'https://script.google.com/macros/s/AKfycbzfvnCNE44MfVsylKbZ1tctZfMqahB0fKabx1_ddtj8N-XLuxeQi2e1DQDIk7-EJDBRHA/exec';
-            form.target = 'hiddenFrame';
-            form.style.display = 'none';
-            
-            // Füge alle Daten als Input-Felder hinzu
-            for (const key in data) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = data[key];
-                form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-            
-            console.log('✅ Formular abgeschickt');
-            return true;
-        }
-
-        // Training Data sammeln
+        // Training Data sammeln - LOKAL SPEICHERN
         function collectTrainingData(originalData, userCorrection) {
             const trainingData = {
                 timestamp: new Date().toISOString(),
@@ -152,11 +139,12 @@
             
             console.log('📧 Speichere Feedback:', trainingData);
             
-            // Sende Daten OHNE await - keine Fehler möglich
-            saveToGoogleSheets(trainingData);
+            // Daten lokal speichern
+            collectedData.push(trainingData);
+            updateDataDisplay();
             
             // Zeige sofort Erfolgsmeldung
-            alert('✅ Feedback erfolgreich gespeichert! Die Daten wurden an Google Sheets übertragen.');
+            alert('✅ Feedback erfolgreich gespeichert!');
             
             // UI zurücksetzen
             document.getElementById('correctionSection').style.display = 'none';
@@ -165,11 +153,40 @@
             return true;
         }
 
-        // Versteckten Frame für Formular-Submits erstellen
-        const hiddenFrame = document.createElement('iframe');
-        hiddenFrame.name = 'hiddenFrame';
-        hiddenFrame.style.display = 'none';
-        document.body.appendChild(hiddenFrame);
+        // Daten-Anzeige aktualisieren
+        function updateDataDisplay() {
+            const output = document.getElementById('dataOutput');
+            const dataSection = document.getElementById('dataSection');
+            
+            if (collectedData.length > 0) {
+                dataSection.style.display = 'block';
+                
+                // Als CSV formatieren (einfach ins Sheet kopieren)
+                let csv = 'Timestamp,DetectedBrand,CorrectBrand,Confidence,FileName,FeedbackType\n';
+                collectedData.forEach(data => {
+                    csv += `"${data.timestamp}","${data.detectedBrand}","${data.correctBrand}",${data.confidence},"${data.fileName}","${data.feedback}"\n`;
+                });
+                
+                output.textContent = csv;
+            } else {
+                dataSection.style.display = 'none';
+            }
+        }
+
+        // In Zwischenablage kopieren
+        function copyToClipboard() {
+            const output = document.getElementById('dataOutput');
+            navigator.clipboard.writeText(output.textContent).then(() => {
+                alert('✅ Daten kopiert! Jetzt in Google Sheets einfügen.');
+            });
+        }
+
+        // Daten löschen
+        function clearData() {
+            collectedData = [];
+            updateDataDisplay();
+            alert('Daten gelöscht');
+        }
 
         // Bild-Upload Event
         document.getElementById('imageUpload').addEventListener('change', async function(event) {
