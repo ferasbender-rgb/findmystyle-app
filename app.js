@@ -1,4 +1,4 @@
-// === KLEIDUNGSMARKEN-ERKENNUNG MIT ECHTER OCR ===
+// === KLEIDUNGSMARKEN-ERKENNUNG MIT DIREKTER GOOGLE SHEETS INTEGRATION ===
 const ENHANCED_CLOTHING_BRANDS = {
     'nike': {
         keywords: ['nike', 'just do it', 'swoosh', 'air max', 'jordan', 'air force'],
@@ -62,6 +62,10 @@ const ENHANCED_CLOTHING_BRANDS = {
     }
 };
 
+// === DIREKTE GOOGLE SHEETS KONFIGURATION ===
+// 🚀 DEINE AKTUELLE WEB-APP URL:
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkDVeg_O_utsMhp7RxffsjOH1oAE00bCLIwEdB2AZMyqURrOWmMatPCz9PUmhqxrFBGg/exec';
+
 // DOM Elemente
 const imageInput = document.getElementById('imageInput');
 const uploadBox = document.getElementById('uploadBox');
@@ -74,34 +78,28 @@ const resultsContent = document.getElementById('resultsContent');
 const correctionSection = document.getElementById('correctionSection');
 const correctBrandInput = document.getElementById('correctBrandInput');
 
-// Training Data für Verbesserungen
+// Training Data
 let trainingData = JSON.parse(localStorage.getItem('brandTrainingData')) || [];
 let currentImageFile = null;
 let currentDetectionResult = null;
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 Kleidungsmarken Erkennung gestartet');
+    console.log('🔍 Kleidungsmarken Erkennung mit direkter Google Sheets Integration');
     
-    // File Input Change Event
     imageInput.addEventListener('change', handleImageSelect);
-    
-    // Drag & Drop Events
     uploadBox.addEventListener('dragover', handleDragOver);
     uploadBox.addEventListener('dragleave', handleDragLeave);
     uploadBox.addEventListener('drop', handleDrop);
     
-    // Klick auf Upload Box
     uploadBox.addEventListener('click', function(e) {
         if (e.target !== imageInput) {
             imageInput.click();
         }
     });
-    
-    console.log('✅ Event Listeners initialisiert');
 });
 
-// Drag & Drop Funktionen
+// Drag & Drop
 function handleDragOver(e) {
     e.preventDefault();
     uploadBox.classList.add('dragover');
@@ -118,7 +116,6 @@ function handleDrop(e) {
     
     const files = e.dataTransfer.files;
     if (files.length > 0 && files[0].type.startsWith('image/')) {
-        console.log('📁 Bild per Drag&Drop erhalten:', files[0].name);
         processImage(files[0]);
     } else {
         showBrandError('Bitte wähle eine Bilddatei aus (JPG, PNG, WebP)');
@@ -129,7 +126,6 @@ function handleDrop(e) {
 function handleImageSelect(e) {
     const file = e.target.files[0];
     if (file && file.type.startsWith('image/')) {
-        console.log('📁 Bild ausgewählt:', file.name);
         processImage(file);
     } else {
         showBrandError('Bitte wähle eine gültige Bilddatei aus');
@@ -138,16 +134,12 @@ function handleImageSelect(e) {
 
 // Bild verarbeiten
 function processImage(file) {
-    console.log('🔄 Verarbeite Bild:', file.name);
     currentImageFile = file;
     
-    // Vorschau anzeigen
     const reader = new FileReader();
     reader.onload = function(e) {
         imagePreview.src = e.target.result;
         previewSection.style.display = 'block';
-        
-        // Markenerkennung starten
         detectBrandFromImage(file);
     };
     
@@ -158,20 +150,15 @@ function processImage(file) {
     reader.readAsDataURL(file);
 }
 
-// === ECHTE OCR-API INTEGRATION ===
+// Echte OCR-API
 async function realTextRecognition(imageFile) {
-    console.log('🔤 Starte echte Texterkennung...');
-    
     try {
-        // OCR.space API (KOSTENLOS - 25.000 Requests/Monat)
         const formData = new FormData();
-        formData.append('apikey', 'KOSTENLOS'); // Kostenloser Key - später ersetzen
+        formData.append('apikey', 'KOSTENLOS');
         formData.append('file', imageFile);
         formData.append('language', 'ger');
         formData.append('isOverlayRequired', 'false');
-        formData.append('OCREngine', '2'); // Engine 2 für bessere Genauigkeit
-        
-        console.log('📡 Sende Request an OCR API...');
+        formData.append('OCREngine', '2');
         
         const response = await fetch('https://api.ocr.space/parse/image', {
             method: 'POST',
@@ -183,7 +170,6 @@ async function realTextRecognition(imageFile) {
         }
         
         const data = await response.json();
-        console.log('📊 OCR API Response:', data);
         
         if (data.IsErroredOnProcessing) {
             throw new Error(data.ErrorMessage || 'OCR Verarbeitungsfehler');
@@ -194,51 +180,39 @@ async function realTextRecognition(imageFile) {
         }
         
         const extractedText = data.ParsedResults[0].ParsedText;
-        console.log('✅ OCR erkannt:', extractedText);
-        
         return extractedText.toLowerCase();
         
     } catch (error) {
-        console.error('❌ OCR Fehler:', error);
-        // Fallback: Dateinamen analysieren
-        console.log('🔄 Fallback zur Dateinamen-Analyse');
+        console.error('OCR Fehler:', error);
         return imageFile.name.toLowerCase();
     }
 }
 
-// === VERBESSERTE MARKENERKENNUNG ===
+// Markenerkennung
 function advancedBrandDetection(text) {
-    console.log('🔍 Analysiere Text auf Marken:', text);
-    
     let bestMatch = { brand: 'unbekannt', confidence: 0, matchedKeywords: [] };
     
     for (const [brand, data] of Object.entries(ENHANCED_CLOTHING_BRANDS)) {
         let score = 0;
         let matched = [];
         
-        // 1. Keyword-Matching (Hauptgewichtung)
         for (const keyword of data.keywords) {
             if (text.includes(keyword)) {
                 score += 2;
                 matched.push(keyword);
-                console.log(`✅ Keyword gefunden: ${keyword} für ${brand}`);
             }
         }
         
-        // 2. Pattern-Matching für Tippfehler
         for (const pattern of data.patterns) {
             if (text.includes(pattern)) {
                 score += 1.5;
                 matched.push(pattern);
-                console.log(`✅ Pattern gefunden: ${pattern} für ${brand}`);
             }
         }
         
-        // 3. Teilwort-Erkennung
-        const words = text.split(/[\s\W]+/); // Split by spaces and non-word chars
+        const words = text.split(/[\s\W]+/);
         for (const word of words) {
-            if (word.length < 3) continue; // Ignoriere kurze Wörter
-            
+            if (word.length < 3) continue;
             for (const keyword of data.keywords) {
                 if (keyword.includes(word) || word.includes(keyword)) {
                     score += 0.5;
@@ -256,27 +230,20 @@ function advancedBrandDetection(text) {
         }
     }
     
-    console.log(`🎯 Beste Übereinstimmung: ${bestMatch.brand} (${bestMatch.confidence})`);
     return bestMatch;
 }
 
-// === HAUPTERKENNUNGSFUNKTION ===
+// Hauptfunktion
 async function detectBrandFromImage(imageFile) {
-    console.log('🚀 Starte erweiterte Markenerkennung...');
     showBrandLoading();
     hideFeedback();
     
     try {
-        // 1. Echte OCR durchführen
         const extractedText = await realTextRecognition(imageFile);
-        
-        // 2. Erweiterte Markenerkennung
         const brandResult = advancedBrandDetection(extractedText);
         
-        // 3. Ergebnis speichern für Feedback
         currentDetectionResult = brandResult;
         
-        // 4. Ergebnis anzeigen
         const displayText = extractedText.length > 100 
             ? extractedText.substring(0, 100) + '...' 
             : extractedText;
@@ -292,8 +259,31 @@ async function detectBrandFromImage(imageFile) {
         showFeedback();
         
     } catch (error) {
-        console.error('❌ Fehler bei erweiterter Erkennung:', error);
+        console.error('Fehler bei erweiterter Erkennung:', error);
         showBrandError('Analyse fehlgeschlagen: ' + error.message);
+    }
+}
+
+// === DIREKTE GOOGLE SHEETS INTEGRATION ===
+async function saveToGoogleSheets(feedbackData) {
+    try {
+        console.log('📤 Sende an Google Sheets:', feedbackData);
+        
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(feedbackData)
+        });
+        
+        const result = await response.text();
+        console.log('✅ Google Sheets Antwort:', result);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Fehler beim Senden an Google Sheets:', error);
+        return false;
     }
 }
 
@@ -307,27 +297,27 @@ function hideFeedback() {
     feedbackSection.style.display = 'none';
 }
 
-function handleFeedback(type) {
+async function handleFeedback(type) {
     if (type === 'correct') {
-        collectTrainingData('correct', null);
+        await collectTrainingData('correct', null);
         showFeedbackSuccess('Danke für dein Feedback! ✅');
     } else {
         correctionSection.style.display = 'block';
     }
 }
 
-function submitCorrection() {
+async function submitCorrection() {
     const correctBrand = correctBrandInput.value.trim();
     if (correctBrand) {
-        collectTrainingData('wrong', correctBrand);
+        await collectTrainingData('wrong', correctBrand);
         showFeedbackSuccess(`Danke! Wir lernen daraus. Korrektur: ${correctBrand}`);
         correctionSection.style.display = 'none';
         correctBrandInput.value = '';
     }
 }
 
-function collectTrainingData(feedbackType, correctBrand) {
-    const trainingEntry = {
+async function collectTrainingData(feedbackType, correctBrand) {
+    const feedbackData = {
         timestamp: new Date().toISOString(),
         detectedBrand: currentDetectionResult.brand,
         confidence: currentDetectionResult.confidence,
@@ -336,11 +326,21 @@ function collectTrainingData(feedbackType, correctBrand) {
         fileName: currentImageFile.name
     };
     
-    trainingData.push(trainingEntry);
+    // 1. Versuche an Google Sheets zu senden
+    const googleSheetsSuccess = await saveToGoogleSheets(feedbackData);
+    
+    // 2. Immer lokal speichern als Backup
+    trainingData.push(feedbackData);
     localStorage.setItem('brandTrainingData', JSON.stringify(trainingData));
     
-    console.log('📊 Training Data gespeichert:', trainingEntry);
-    console.log('📈 Gesamte Training Data:', trainingData);
+    console.log('📊 Feedback gespeichert:', feedbackData);
+    console.log('🌐 Google Sheets Erfolg:', googleSheetsSuccess);
+    
+    if (googleSheetsSuccess) {
+        showFeedbackSuccess('✅ Feedback gespeichert & gelernt!');
+    } else {
+        showFeedbackSuccess('💾 Feedback lokal gespeichert');
+    }
 }
 
 function showFeedbackSuccess(message) {
@@ -352,6 +352,42 @@ function showFeedbackSuccess(message) {
     setTimeout(() => {
         tempDiv.remove();
     }, 3000);
+}
+
+// === ADMIN FUNKTIONEN ===
+function exportTrainingData() {
+    const data = JSON.parse(localStorage.getItem('brandTrainingData') || '[]');
+    const csv = convertToCSV(data);
+    downloadCSV(csv, 'marken-feedback.csv');
+}
+
+function convertToCSV(data) {
+    const headers = ['Timestamp', 'DetectedBrand', 'CorrectBrand', 'Confidence', 'FileName', 'FeedbackType'];
+    const csv = [headers.join(',')];
+    
+    data.forEach(row => {
+        const line = [
+            `"${row.timestamp}"`,
+            `"${row.detectedBrand}"`,
+            `"${row.correctBrand || ''}"`,
+            row.confidence,
+            `"${row.fileName}"`,
+            `"${row.feedback}"`
+        ];
+        csv.push(line.join(','));
+    });
+    
+    return csv.join('\n');
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
 }
 
 // === ANZEIGE-FUNKTIONEN ===
@@ -383,8 +419,6 @@ function showBrandResult(result) {
                 <strong>❌ Keine Marke erkannt</strong>
                 <br>
                 <small>Erkannter Text: "${result.extractedText}"</small>
-                <br>
-                <small>Versuche ein Bild mit besser sichtbarem Markentext</small>
             </div>
         `;
         brandResult.className = 'brand-result brand-unknown';
@@ -411,9 +445,6 @@ function showDetailedResults(brandResult, imageFile, extractedText) {
                 <strong>📁 Dateiname:</strong> ${imageFile.name}
             </div>
             <div class="result-item">
-                <strong>📏 Größe:</strong> ${(imageFile.size / 1024 / 1024).toFixed(2)} MB
-            </div>
-            <div class="result-item">
                 <strong>👕 Erkannte Marke:</strong> ${brandResult.brand.toUpperCase()}
             </div>
             <div class="result-item">
@@ -423,10 +454,7 @@ function showDetailedResults(brandResult, imageFile, extractedText) {
                 <strong>🔤 Gefundene Keywords:</strong> ${brandResult.matchedKeywords.join(', ') || 'Keine'}
             </div>
             <div class="result-item">
-                <strong>📝 Vollständiger Text:</strong> ${extractedText.substring(0, 200)}...
-            </div>
-            <div class="result-item">
-                <strong>💡 Tipp:</strong> ${getBrandTip(brandResult.brand)}
+                <button onclick="exportTrainingData()" class="feedback-btn submit">📥 Lokale Daten exportieren</button>
             </div>
         </div>
     `;
@@ -434,22 +462,10 @@ function showDetailedResults(brandResult, imageFile, extractedText) {
     resultsContent.innerHTML = resultsHTML;
 }
 
-function getBrandTip(brand) {
-    const tips = {
-        'nike': 'Achte auf den "Swoosh" und "Just Do It" Text',
-        'adidas': 'Suche nach den drei Streifen und dem Markennamen',
-        'puma': 'Der springende Puma ist das Haupt-Logo',
-        'h&m': 'Oft in weißer oder schwarzer Schrift auf rotem Grund',
-        'supreme': 'Box Logo mit weißer Schrift auf rotem Grund',
-        'unbekannt': 'Versuche ein Bild mit klarer, lesbarer Marken-Schrift'
-    };
-    
-    return tips[brand] || 'Marke in der erweiterten Datenbank erkannt';
-}
+// Globale Funktionen für HTML onclick
+window.handleFeedback = handleFeedback;
+window.submitCorrection = submitCorrection;
+window.exportTrainingData = exportTrainingData;
 
-// === INIT ===
-console.log('🎉 Kleidungsmarken Erkennung Phase 1 aktiviert!');
-console.log('✅ Echte OCR-API integriert');
-console.log('✅ Erweiterte Markendatenbank');
-console.log('✅ Feedback-System aktiv');
-console.log('📊 Training Data Einträge:', trainingData.length);
+console.log('🎉 Kleidungsmarken Erkennung mit direkter Google Sheets Integration ready!');
+console.log('🌐 Web-App URL:', GOOGLE_SCRIPT_URL);
