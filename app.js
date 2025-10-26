@@ -151,25 +151,16 @@ function processImage(file) {
 }
 
 // KOSTENLOSE OCR MIT TESSERACT.JS
-async function realTextRecognition(imageFile) {
-    try {
-        console.log('🔤 Starte Tesseract OCR...');
-        
-        // Tesseract.js im Browser
-        const { createWorker } = Tesseract;
-        const worker = await createWorker('eng+ger');
-        
-        const { data: { text } } = await worker.recognize(imageFile);
-        await worker.terminate();
-        
-        console.log('✅ Tesseract OCR erkannt:', text);
-        return text.toLowerCase();
-        
-    } catch (error) {
-        console.error('OCR Fehler:', error);
-        // Fallback zur Dateinamen-Analyse
-        return imageFile.name.toLowerCase();
-    }
+async function recognizeText(imageFile) {
+  try {
+    const worker = await Tesseract.createWorker('eng');
+    const { data: { text } } = await worker.recognize(imageFile);
+    await worker.terminate();
+    return text;
+  } catch (error) {
+    console.error('OCR Fehler:', error);
+    return null;
+  }
 }
 
 // Markenerkennung
