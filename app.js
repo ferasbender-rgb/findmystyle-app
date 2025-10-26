@@ -1,145 +1,253 @@
-// Demo-KI für Fashion-Erkennung - AL QAMAR STYLE Version
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const startBtn = document.getElementById('startBtn');
+// === KLEIDUNGSMARKEN-ERKENNUNG ===
+const CLOTHING_BRANDS = {
+    'nike': ['nike', 'just do it'],
+    'adidas': ['adidas', 'adidas'],
+    'puma': ['puma'],
+    'h&m': ['h&m', 'hm'],
+    'zara': ['zara'],
+    'uniqlo': ['uniqlo'],
+    'lacoste': ['lacoste'],
+    'supreme': ['supreme'],
+    'gucci': ['gucci'],
+    'champion': ['champion'],
+    'vans': ['vans'],
+    'converse': ['converse'],
+    'tommy hilfiger': ['tommy', 'hilfiger'],
+    'calvin klein': ['calvin', 'klein', 'ck']
+};
+
+// DOM Elemente
+const imageInput = document.getElementById('imageInput');
+const uploadBox = document.getElementById('uploadBox');
+const previewSection = document.getElementById('previewSection');
+const imagePreview = document.getElementById('imagePreview');
+const brandResult = document.getElementById('brandResult');
+const resultsSection = document.getElementById('resultsSection');
 const resultsContent = document.getElementById('resultsContent');
-const loadingElement = document.getElementById('loading');
 
-// Event Listener
-uploadArea.addEventListener('click', () => fileInput.click());
-startBtn.addEventListener('click', () => fileInput.click());
-
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) handleImageFile(file);
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Klick auf Upload Box
+    uploadBox.addEventListener('click', () => imageInput.click());
+    
+    // Datei Auswahl
+    imageInput.addEventListener('change', handleImageSelect);
+    
+    // Drag & Drop Events
+    uploadBox.addEventListener('dragover', handleDragOver);
+    uploadBox.addEventListener('dragleave', handleDragLeave);
+    uploadBox.addEventListener('drop', handleDrop);
 });
 
-// Bild "analysieren" - Demo Version
-async function handleImageFile(file) {
-    if (!file.type.startsWith('image/')) {
-        showError('Please select an image file');
-        return;
-    }
-
-    showLoading();
-    
-    // 2 Sekunden warten für realistische Demo
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Zufällige Kleidungs-Erkennung
-    const detectedItems = generateFashionDetection();
-    displayResults(detectedItems);
-    hideLoading();
+// Drag & Drop Funktionen
+function handleDragOver(e) {
+    e.preventDefault();
+    uploadBox.classList.add('dragover');
 }
 
-// Demo-KI: Generiert zufällige Fashion-Ergebnisse
-function generateFashionDetection() {
-    const clothingTypes = [
-        'Blouse', 'Shirt', 'Dress', 'Jeans', 'Pants', 'Jacket', 
-        'Sweater', 'Skirt', 'Shorts', 'Blazer', 'Coat', 'Shoes'
-    ];
-    
-    const colors = ['White', 'Black', 'Blue', 'Red', 'Green', 'Gray', 'Brown', 'Beige'];
-    const materials = ['Cotton', 'Denim', 'Wool', 'Silk', 'Linen', 'Polyester'];
-    
-    const results = [];
-    const numItems = Math.floor(Math.random() * 3) + 2; // 2-4 Items
-    
-    for (let i = 0; i < numItems; i++) {
-        const type = clothingTypes[Math.floor(Math.random() * clothingTypes.length)];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const material = materials[Math.floor(Math.random() * materials.length)];
-        const confidence = Math.floor(Math.random() * 30) + 70; // 70-99%
-        
-        results.push({
-            type: type,
-            color: color,
-            material: material,
-            confidence: confidence
-        });
-    }
-    
-    return results;
+function handleDragLeave(e) {
+    e.preventDefault();
+    uploadBox.classList.remove('dragover');
 }
 
-// Ergebnisse im neuen Design anzeigen
-function displayResults(items) {
-    let html = '';
+function handleDrop(e) {
+    e.preventDefault();
+    uploadBox.classList.remove('dragover');
     
-    // Haupt-Ergebnis (erstes Item prominent)
-    if (items.length > 0) {
-        const mainItem = items[0];
-        html += `
-            <div class="result-item">
-                <div class="result-header">
-                    <div class="result-title">${mainItem.color} ${mainItem.type}</div>
-                    <div class="result-type">Exact match</div>
-                </div>
-                <div class="result-matches">
-                    <div class="match-item">
-                        <span class="match-company">Zalando</span>
-                        <span class="match-price">€${Math.floor(Math.random() * 30) + 30}</span>
-                    </div>
-                    <div class="match-item">
-                        <span class="match-company">H&M</span>
-                        <span class="match-price">€${Math.floor(Math.random() * 20) + 20}</span>
-                    </div>
-                    <div class="match-item">
-                        <span class="match-company">About You</span>
-                        <span class="match-price">€${Math.floor(Math.random() * 40) + 25}</span>
-                    </div>
-                </div>
-            </div>
-        `;
+    const files = e.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith('image/')) {
+        processImage(files[0]);
     }
+}
 
-    // Weitere Ergebnisse
-    if (items.length > 1) {
-        html += '<h3 style="margin: 25px 0 15px; font-size: 18px;">Similar items</h3>';
+// Datei Auswahl
+function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        processImage(file);
+    }
+}
+
+// Bild verarbeiten
+function processImage(file) {
+    // Vorschau anzeigen
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        previewSection.style.display = 'block';
         
-        for (let i = 1; i < items.length; i++) {
-            const item = items[i];
-            html += `
-                <div class="result-item">
-                    <div class="result-header">
-                        <div class="result-title">${item.color} ${item.type}</div>
-                        <div class="result-type">${item.confidence}% match</div>
-                    </div>
-                </div>
-            `;
+        // Markenerkennung starten
+        detectBrandFromImage(file);
+    };
+    reader.readAsDataURL(file);
+}
+
+// Einfache Texterkennung (simuliert)
+function checkForBrands(text) {
+    const lowerText = text.toLowerCase();
+    const foundBrands = {};
+    
+    for (const [brand, keywords] of Object.entries(CLOTHING_BRANDS)) {
+        for (const keyword of keywords) {
+            if (lowerText.includes(keyword)) {
+                foundBrands[brand] = (foundBrands[brand] || 0) + 1;
+            }
         }
     }
     
-    resultsContent.innerHTML = html;
+    if (Object.keys(foundBrands).length > 0) {
+        const bestBrand = Object.keys(foundBrands).reduce((a, b) => 
+            foundBrands[a] > foundBrands[b] ? a : b
+        );
+        const confidence = Math.min(foundBrands[bestBrand] / 3, 1);
+        return { brand: bestBrand, confidence: confidence };
+    }
+    
+    return { brand: 'unbekannt', confidence: 0 };
 }
 
-// Loading States
-function showLoading() {
-    loadingElement.style.display = 'block';
-    resultsContent.innerHTML = '';
+// Hauptfunktion für Markenerkennung
+async function detectBrandFromImage(imageFile) {
+    // Ladeanimation anzeigen
+    showBrandLoading();
+    
+    // Simulierte Verarbeitungszeit
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    try {
+        // In einer echten App würde hier OCR stattfinden
+        // Für diese Demo: Simulierte Erkennung basierend auf Dateinamen und Zufall
+        const fileName = imageFile.name.toLowerCase();
+        let detectedBrand = 'unbekannt';
+        let confidence = 0;
+        
+        // 1. Versuch: Im Dateinamen suchen
+        for (const [brand, keywords] of Object.entries(CLOTHING_BRANDS)) {
+            for (const keyword of keywords) {
+                if (fileName.includes(keyword)) {
+                    detectedBrand = brand;
+                    confidence = 0.85;
+                    break;
+                }
+            }
+            if (detectedBrand !== 'unbekannt') break;
+        }
+        
+        // 2. Versuch: Zufällige Erkennung (für Demo)
+        if (detectedBrand === 'unbekannt') {
+            const brands = Object.keys(CLOTHING_BRANDS);
+            const randomIndex = Math.floor(Math.random() * brands.length);
+            detectedBrand = brands[randomIndex];
+            confidence = Math.random() * 0.3 + 0.5; // 50-80% confidence
+        }
+        
+        const result = {
+            brand: detectedBrand,
+            confidence: confidence,
+            message: detectedBrand === 'unbekannt' 
+                ? 'Keine Marke erkannt. Versuche ein Bild mit besser sichtbarem Markentext.' 
+                : `Marke erfolgreich erkannt!`
+        };
+        
+        showBrandResult(result);
+        showDetailedResults(result, imageFile);
+        
+    } catch (error) {
+        showBrandError('Fehler bei der Markenerkennung: ' + error.message);
+    }
 }
 
-function hideLoading() {
-    loadingElement.style.display = 'none';
+// Ergebnis anzeigen Funktionen
+function showBrandLoading() {
+    brandResult.innerHTML = `
+        <div>
+            <span class="loading"></span>
+            Analysiere Bild...
+        </div>
+    `;
+    brandResult.className = 'brand-result';
 }
 
-function showError(message) {
-    resultsContent.innerHTML = `<div class="error">${message}</div>`;
+function showBrandResult(result) {
+    if (result.brand !== 'unbekannt') {
+        brandResult.innerHTML = `
+            <div>
+                <strong>✅ ${result.brand.toUpperCase()} erkannt!</strong>
+                <br>
+                <small>Sicherheit: ${(result.confidence * 100).toFixed(0)}%</small>
+                <br>
+                <small>${result.message}</small>
+            </div>
+        `;
+        brandResult.className = 'brand-result brand-detected';
+    } else {
+        brandResult.innerHTML = `
+            <div>
+                <strong>❌ Keine Marke erkannt</strong>
+                <br>
+                <small>${result.message}</small>
+            </div>
+        `;
+        brandResult.className = 'brand-result brand-unknown';
+    }
 }
 
-// Drag & Drop Funktion
-uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.style.background = '#f0ebff';
-});
+function showBrandError(message) {
+    brandResult.innerHTML = `
+        <div>
+            <strong>⚠️ Fehler</strong>
+            <br>
+            <small>${message}</small>
+        </div>
+    `;
+    brandResult.className = 'brand-result brand-error';
+}
 
-uploadArea.addEventListener('dragleave', () => {
-    uploadArea.style.background = '#fafafa';
-});
+// Detaillierte Ergebnisse anzeigen
+function showDetailedResults(brandResult, imageFile) {
+    resultsSection.style.display = 'block';
+    
+    const resultsHTML = `
+        <div class="detailed-results">
+            <div class="result-item">
+                <strong>📁 Dateiname:</strong> ${imageFile.name}
+            </div>
+            <div class="result-item">
+                <strong>📏 Größe:</strong> ${(imageFile.size / 1024 / 1024).toFixed(2)} MB
+            </div>
+            <div class="result-item">
+                <strong>👕 Erkannte Marke:</strong> ${brandResult.brand.toUpperCase()}
+            </div>
+            <div class="result-item">
+                <strong>📊 Erkennungs-Sicherheit:</strong> ${(brandResult.confidence * 100).toFixed(0)}%
+            </div>
+            <div class="result-item">
+                <strong>💡 Tipp:</strong> ${getBrandTip(brandResult.brand)}
+            </div>
+        </div>
+    `;
+    
+    resultsContent.innerHTML = resultsHTML;
+}
 
-uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.style.background = '#fafafa';
-    const file = e.dataTransfer.files[0];
-    if (file) handleImageFile(file);
-});
+// Tipps für verschiedene Marken
+function getBrandTip(brand) {
+    const tips = {
+        'nike': 'Achte auf den "Swoosh" und "Just Do It" Text',
+        'adidas': 'Suche nach den drei Streifen und dem Markennamen',
+        'puma': 'Der springende Puma ist das Haupt-Logo',
+        'h&m': 'Oft in weißer oder schwarzer Schrift auf rotem Grund',
+        'zara': 'Elegante, minimalistische Schrift',
+        'supreme': Box Logo mit weißer Schrift auf rotem Grund',
+        'unbekannt': 'Versuche ein Bild mit klarer, lesbarer Marken-Schrift'
+    };
+    
+    return tips[brand] || 'Marke in der Datenbank erkannt';
+}
+
+// Export für spätere Erweiterungen
+window.ClothingBrandDetector = {
+    detectBrandFromImage,
+    checkForBrands,
+    CLOTHING_BRANDS
+};
