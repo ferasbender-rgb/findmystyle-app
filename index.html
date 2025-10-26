@@ -6,54 +6,14 @@
     <title>Kleidungsmarken Erkennung</title>
     <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .upload-section, .result-section, .correction-section {
-            margin: 20px 0;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        #imagePreview img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 10px;
-        }
-        input[type="file"], input[type="text"], button {
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        input[type="file"] {
-            width: 100%;
-        }
-        input[type="text"] {
-            width: 300px;
-        }
-        button {
-            background-color: #007cba;
-            color: white;
-            cursor: pointer;
-            border: none;
-        }
-        button:hover {
-            background-color: #005a87;
-        }
-        .hidden {
-            display: none;
-        }
-        #dataOutput {
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            white-space: pre-wrap;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .upload-section, .result-section, .correction-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        #imagePreview img { max-width: 100%; height: auto; margin-top: 10px; }
+        input[type="file"], input[type="text"], button { padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007cba; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .hidden { display: none; }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -78,198 +38,108 @@
         <button id="submitCorrection">Korrektur speichern</button>
     </div>
 
-    <div id="dataSection" class="result-section hidden">
-        <h3>📊 Gesammelte Daten (Kopiere diese in dein Google Sheet)</h3>
-        <div id="dataOutput"></div>
-        <button onclick="copyToClipboard()">Daten kopieren</button>
-        <button onclick="clearData()">Daten löschen</button>
+    <div id="resultSection" class="result-section hidden">
+        <h3>✅ Feedback gespeichert!</h3>
+        <div id="savedData" class="success"></div>
+        <button onclick="copyData()">Daten kopieren</button>
     </div>
 
     <script>
-        // Tesseract.js Worker
         let worker;
-        let collectedData = [];
+        let allData = [];
 
-        // Initialisiere Tesseract OCR
         async function initializeOCR() {
-            try {
-                console.log('Starte Tesseract OCR...');
-                worker = await Tesseract.createWorker('eng');
-                await worker.loadLanguage('eng');
-                await worker.initialize('eng');
-                console.log('Tesseract OCR initialisiert');
-            } catch (error) {
-                console.error('Fehler bei OCR-Initialisierung:', error);
-            }
+            worker = await Tesseract.createWorker('eng');
+            await worker.loadLanguage('eng');
+            await worker.initialize('eng');
         }
 
-        // Texterkennung durchführen
         async function recognizeText(imageFile) {
-            try {
-                if (!worker) {
-                    await initializeOCR();
-                }
-                const { data: { text } } = await worker.recognize(imageFile);
-                return text.trim();
-            } catch (error) {
-                console.error('OCR Fehler:', error);
-                return null;
-            }
+            if (!worker) await initializeOCR();
+            const { data: { text } } = await worker.recognize(imageFile);
+            return text.trim();
         }
 
-        // Marken aus erkanntem Text extrahieren
         function extractBrands(text) {
             const brands = ['Nike', 'Adidas', 'Puma', 'H&M', 'Zara', 'G-Star', 'Tommy Hilfiger', 'Calvin Klein'];
-            const foundBrands = brands.filter(brand => 
-                text.toLowerCase().includes(brand.toLowerCase())
-            );
-            return foundBrands.length > 0 ? foundBrands[0] : 'unbekannt';
+            return brands.find(brand => text.toLowerCase().includes(brand.toLowerCase())) || 'unbekannt';
         }
 
-        // Training Data sammeln - LOKAL SPEICHERN
-        function collectTrainingData(originalData, userCorrection) {
-            const trainingData = {
-                timestamp: new Date().toISOString(),
-                detectedBrand: originalData.detectedBrand,
-                correctBrand: userCorrection,
-                confidence: originalData.confidence || 0.8,
-                fileName: originalData.fileName || 'unknown',
-                feedback: originalData.detectedBrand === userCorrection ? 'correct' : 'wrong'
-            };
-            
-            console.log('📧 Speichere Feedback:', trainingData);
-            
-            // Daten lokal speichern
-            collectedData.push(trainingData);
-            updateDataDisplay();
-            
-            // Zeige sofort Erfolgsmeldung
-            alert('✅ Feedback erfolgreich gespeichert!');
-            
-            // UI zurücksetzen
-            document.getElementById('correctionSection').style.display = 'none';
-            document.getElementById('brandCorrection').value = '';
-            
-            return true;
-        }
-
-        // Daten-Anzeige aktualisieren
-        function updateDataDisplay() {
-            const output = document.getElementById('dataOutput');
-            const dataSection = document.getElementById('dataSection');
-            
-            if (collectedData.length > 0) {
-                dataSection.style.display = 'block';
-                
-                // Als CSV formatieren (einfach ins Sheet kopieren)
-                let csv = 'Timestamp,DetectedBrand,CorrectBrand,Confidence,FileName,FeedbackType\n';
-                collectedData.forEach(data => {
-                    csv += `"${data.timestamp}","${data.detectedBrand}","${data.correctBrand}",${data.confidence},"${data.fileName}","${data.feedback}"\n`;
-                });
-                
-                output.textContent = csv;
-            } else {
-                dataSection.style.display = 'none';
-            }
-        }
-
-        // In Zwischenablage kopieren
-        function copyToClipboard() {
-            const output = document.getElementById('dataOutput');
-            navigator.clipboard.writeText(output.textContent).then(() => {
-                alert('✅ Daten kopiert! Jetzt in Google Sheets einfügen.');
-            });
-        }
-
-        // Daten löschen
-        function clearData() {
-            collectedData = [];
-            updateDataDisplay();
-            alert('Daten gelöscht');
-        }
-
-        // Bild-Upload Event
         document.getElementById('imageUpload').addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            // Bild anzeigen
             const preview = document.getElementById('imagePreview');
-            const resultDiv = document.getElementById('ocrResult');
-            const brandResult = document.getElementById('brandResult');
-            const correctionSection = document.getElementById('correctionSection');
-            const correctionInput = document.getElementById('brandCorrection');
+            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width: 300px;">`;
 
-            // Bildvorschau anzeigen
-            preview.innerHTML = '';
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
-            img.style.maxWidth = '300px';
-            img.style.border = '1px solid #ccc';
-            preview.appendChild(img);
-
-            // OCR durchführen
-            resultDiv.textContent = 'Erkenne Text...';
-            brandResult.textContent = 'Analysiere Marke...';
+            // OCR
+            document.getElementById('ocrResult').textContent = 'Erkenne Text...';
+            document.getElementById('brandResult').textContent = 'Analysiere Marke...';
 
             try {
                 const text = await recognizeText(file);
-                resultDiv.textContent = text || 'Kein Text erkannt';
-                
                 const detectedBrand = text ? extractBrands(text) : 'unbekannt';
-                brandResult.textContent = `Erkannte Marke: ${detectedBrand}`;
                 
-                // Korrektur-Sektion anzeigen
-                correctionSection.style.display = 'block';
-                correctionInput.value = detectedBrand !== 'unbekannt' ? detectedBrand : '';
-                correctionInput.focus();
+                document.getElementById('ocrResult').textContent = text || 'Kein Text erkannt';
+                document.getElementById('brandResult').textContent = `Erkannte Marke: ${detectedBrand}`;
                 
-                // Aktuelle Daten speichern für spätere Korrektur
+                // Korrektur anzeigen
+                document.getElementById('correctionSection').style.display = 'block';
+                document.getElementById('brandCorrection').value = detectedBrand !== 'unbekannt' ? detectedBrand : '';
+                
                 window.currentOCRData = {
                     detectedBrand: detectedBrand,
-                    confidence: text ? 0.8 : 0,
                     fileName: file.name,
                     originalText: text
                 };
                 
             } catch (error) {
-                resultDiv.textContent = 'Fehler bei der Texterkennung';
-                brandResult.textContent = 'Markenerkennung fehlgeschlagen';
-                console.error('Verarbeitungsfehler:', error);
+                document.getElementById('ocrResult').textContent = 'Fehler bei der Texterkennung';
             }
         });
 
-        // Korrektur abschicken
         function submitCorrection() {
-            const correctionInput = document.getElementById('brandCorrection');
-            const userBrand = correctionInput.value.trim();
+            const userBrand = document.getElementById('brandCorrection').value.trim();
+            if (!userBrand) return alert('Bitte Marke eingeben');
+
+            const data = {
+                timestamp: new Date().toLocaleString(),
+                detectedBrand: window.currentOCRData.detectedBrand,
+                correctBrand: userBrand,
+                fileName: window.currentOCRData.fileName,
+                confidence: 0.8
+            };
+
+            allData.push(data);
             
-            if (!userBrand) {
-                alert('Bitte gib eine Marke ein');
-                return;
-            }
+            // Erfolg anzeigen
+            document.getElementById('savedData').innerHTML = 
+                `Datum: ${data.timestamp}<br>
+                 Erkannt: ${data.detectedBrand}<br>
+                 Korrektur: ${data.correctBrand}<br>
+                 Datei: ${data.fileName}`;
             
-            if (!window.currentOCRData) {
-                alert('Keine OCR-Daten verfügbar');
-                return;
-            }
-            
-            collectTrainingData(window.currentOCRData, userBrand);
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('correctionSection').style.display = 'none';
+            document.getElementById('brandCorrection').value = '';
         }
 
-        // App initialisieren
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeOCR();
+        function copyData() {
+            const text = allData.map(d => 
+                `${d.timestamp}, ${d.detectedBrand}, ${d.correctBrand}, ${d.fileName}`
+            ).join('\n');
             
-            // Event Listener für Korrektur-Button
-            document.getElementById('submitCorrection').addEventListener('click', submitCorrection);
-            
-            // Enter-Taste für Korrektur-Eingabe
-            document.getElementById('brandCorrection').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    submitCorrection();
-                }
-            });
+            navigator.clipboard.writeText(text);
+            alert('Daten kopiert! Einfach in Excel/Sheets einfügen.');
+        }
+
+        document.getElementById('submitCorrection').addEventListener('click', submitCorrection);
+        document.getElementById('brandCorrection').addEventListener('keypress', e => {
+            if (e.key === 'Enter') submitCorrection();
         });
+
+        initializeOCR();
     </script>
 </body>
 </html>
