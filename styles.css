@@ -68,7 +68,6 @@ main {
     background: #d5f4e6;
 }
 
-/* File Input sichtbar machen */
 #imageInput {
     position: absolute;
     top: 0;
@@ -171,6 +170,73 @@ main {
     color: #721c24;
 }
 
+/* Feedback Buttons */
+.feedback-buttons {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.feedback-buttons small {
+    display: block;
+    margin-bottom: 10px;
+    color: #6c757d;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.feedback-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.feedback-btn.correct {
+    background: #28a745;
+    color: white;
+}
+
+.feedback-btn.correct:hover {
+    background: #218838;
+}
+
+.feedback-btn.wrong {
+    background: #dc3545;
+    color: white;
+}
+
+.feedback-btn.wrong:hover {
+    background: #c82333;
+}
+
+.feedback-btn.submit {
+    background: #007bff;
+    color: white;
+    margin-left: 10px;
+}
+
+.feedback-btn.submit:hover {
+    background: #0056b3;
+}
+
+#correctBrandInput {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9em;
+    width: 200px;
+}
+
 /* Ergebnisse Bereich */
 .results-section {
     margin: 30px 0;
@@ -249,5 +315,20 @@ footer {
     
     .upload-box {
         padding: 30px 15px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    #correctBrandInput {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .feedback-btn.submit {
+        margin-left: 0;
+        width: 100%;
     }
 }
