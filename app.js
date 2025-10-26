@@ -63,8 +63,8 @@ const ENHANCED_CLOTHING_BRANDS = {
 };
 
 // === DIREKTE GOOGLE SHEETS KONFIGURATION ===
-// 🚀 DEINE AKTUELLE WEB-APP URL:
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxkDVeg_O_utsMhp7RxffsjOH1oAE00bCLIwEdB2AZMyqURrOWmMatPCz9PUmhqxrFBGg/exec';
+// 🚀 DEINE NEUE WEB-APP URL NACH NEUER BEREITSTELLUNG:
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/DEINE_NEUE_URL_HIER/exec';
 
 // DOM Elemente
 const imageInput = document.getElementById('imageInput');
@@ -150,40 +150,24 @@ function processImage(file) {
     reader.readAsDataURL(file);
 }
 
-// Echte OCR-API
+// KOSTENLOSE OCR MIT TESSERACT.JS
 async function realTextRecognition(imageFile) {
     try {
-        const formData = new FormData();
-        formData.append('apikey', 'KOSTENLOS');
-        formData.append('file', imageFile);
-        formData.append('language', 'ger');
-        formData.append('isOverlayRequired', 'false');
-        formData.append('OCREngine', '2');
+        console.log('🔤 Starte Tesseract OCR...');
         
-        const response = await fetch('https://api.ocr.space/parse/image', {
-            method: 'POST',
-            body: formData
-        });
+        // Tesseract.js im Browser
+        const { createWorker } = Tesseract;
+        const worker = await createWorker('eng+ger');
         
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status}`);
-        }
+        const { data: { text } } = await worker.recognize(imageFile);
+        await worker.terminate();
         
-        const data = await response.json();
-        
-        if (data.IsErroredOnProcessing) {
-            throw new Error(data.ErrorMessage || 'OCR Verarbeitungsfehler');
-        }
-        
-        if (!data.ParsedResults || data.ParsedResults.length === 0) {
-            throw new Error('Kein Text im Bild erkannt');
-        }
-        
-        const extractedText = data.ParsedResults[0].ParsedText;
-        return extractedText.toLowerCase();
+        console.log('✅ Tesseract OCR erkannt:', text);
+        return text.toLowerCase();
         
     } catch (error) {
         console.error('OCR Fehler:', error);
+        // Fallback zur Dateinamen-Analyse
         return imageFile.name.toLowerCase();
     }
 }
