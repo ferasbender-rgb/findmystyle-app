@@ -6,13 +6,14 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Al-Qamar Fashion - Produkt Suche</title>
+    <title>Al-Qamar Fashion - Automatische Produktsuche</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
@@ -21,159 +22,389 @@
             min-height: 100vh;
             padding: 20px;
         }
+        
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
+        
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 10px;
             font-size: 2.5em;
         }
-        p {
+        
+        .subtitle {
             text-align: center;
             color: #7f8c8d;
             margin-bottom: 30px;
             font-size: 1.1em;
         }
+        
         .upload-section {
             text-align: center;
             margin-bottom: 30px;
         }
+        
         #imageUpload {
-            padding: 15px;
-            border: 2px dashed #3498db;
-            border-radius: 10px;
+            padding: 20px;
+            border: 3px dashed #3498db;
+            border-radius: 12px;
             background: #f8f9fa;
             cursor: pointer;
             width: 100%;
             font-size: 16px;
+            transition: all 0.3s ease;
         }
+        
+        #imageUpload:hover {
+            border-color: #2980b9;
+            background: #e8f4fc;
+        }
+        
         #imagePreview {
             margin-top: 20px;
             text-align: center;
         }
+        
         #imagePreview img {
             max-width: 300px;
             border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        button {
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .loading-text {
+            font-size: 1.2em;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .results-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .product-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .product-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .product-image {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .product-info {
+            flex: 1;
+        }
+        
+        .product-title {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .product-price {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.4em;
+            margin-bottom: 8px;
+        }
+        
+        .product-shop {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        
+        .product-confidence {
             background: #3498db;
             color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
-        .product-link {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
             display: inline-block;
-            background: #27ae60;
+            margin-bottom: 12px;
+        }
+        
+        .product-link {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
             color: white;
             padding: 12px 24px;
             border-radius: 8px;
             text-decoration: none;
-            margin-top: 10px;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        
+        .product-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .exact-match {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #f8fff9, #ffffff);
+        }
+        
+        .exact-match-badge {
+            background: #27ae60;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .product-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .product-image {
+                width: 200px;
+                height: 200px;
+                margin: 0 auto;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛍️ Al-Qamar Fashion</h1>
-        <p>Lade ein Produktbild hoch und finde den Kauf-Link!</p>
+        <p class="subtitle">Lade ein Produktbild hoch - wir finden es automatisch in allen Shops!</p>
         
         <div class="upload-section">
             <input type="file" id="imageUpload" accept="image/*">
             <div id="imagePreview"></div>
         </div>
 
-        <div id="urlInputSection" style="display: none; margin: 20px 0; padding: 20px; border: 2px dashed #ddd; border-radius: 10px;">
-            <h3>🔗 Bild-URL eingeben</h3>
-            <p>Füge die URL des Produktbildes ein (z.B. von G-Star):</p>
-            <input type="text" id="productImageUrl" placeholder="https://img1.g-star.com/..." style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px;">
-            <button onclick="startProductSearch()">🛍️ Produkt finden</button>
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <p class="loading-text">🔍 Analysiere Bild und durchsuche Shops...</p>
+            <p>Dies kann einige Sekunden dauern</p>
         </div>
 
-        <div id="ocrResult"></div>
-        <div id="brandResult"></div>
+        <div class="results" id="resultsSection">
+            <!-- Hier kommen die Produktergebnisse -->
+        </div>
     </div>
 
     <script>
-        // EINFACHE PRODUKT-SUCHE OHNE OCR
-        async function searchProductByImageUrl(imageUrl) {
-            try {
-                document.getElementById('ocrResult').innerHTML = '<div class="success-message">🔍 Suche Produkt...</div>';
-                
-                const response = await fetch('/api/find-product', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ imageUrl: imageUrl })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('ocrResult').innerHTML = `
-                        <div class="success-message">
-                            ✅ Produkt gefunden!<br><br>
-                            <a href="${data.productLink}" target="_blank" class="product-link">
-                               🛒 Hier klicken zum Produkt
-                            </a>
-                        </div>
-                    `;
-                    document.getElementById('brandResult').textContent = `Produktcode: ${data.productCode}`;
-                } else {
-                    document.getElementById('ocrResult').innerHTML = `
-                        <div class="error-message">❌ ${data.error || 'Produkt nicht gefunden'}</div>
-                    `;
-                }
-            } catch (error) {
-                document.getElementById('ocrResult').innerHTML = '<div class="error-message">❌ Fehler bei der Suche</div>';
-            }
-        }
-
-        // Bild-Upload
-        document.getElementById('imageUpload').addEventListener('change', function(event) {
+        // AUTOMATISCHE BILDANALYSE
+        document.getElementById('imageUpload').addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
+            // Bildvorschau anzeigen
             const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '<img src="' + URL.createObjectURL(file) + '" style="max-width:300px;border-radius:10px">';
-            
-            document.getElementById('ocrResult').innerHTML = '<div class="success-message">✅ Bild hochgeladen! Jetzt URL eingeben.</div>';
-            document.getElementById('urlInputSection').style.display = 'block';
+            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:300px;border-radius:10px">`;
+
+            // Lade-Animation starten
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('resultsSection').innerHTML = '';
+
+            try {
+                // Bild zu Base64 konvertieren
+                const imageBase64 = await fileToBase64(file);
+                
+                console.log('📤 Sende Bild zur Analyse...');
+                
+                // Automatische Analyse starten
+                const response = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ imageData: imageBase64 })
+                });
+
+                const data = await response.json();
+                console.log('📥 Ergebnisse erhalten:', data);
+                
+                // Ergebnisse anzeigen
+                showResults(data);
+                
+            } catch (error) {
+                console.error('❌ Fehler:', error);
+                document.getElementById('resultsSection').innerHTML = 
+                    '<div class="error-message">❌ Fehler bei der Suche: ' + error.message + '</div>';
+            } finally {
+                document.getElementById('loadingSection').style.display = 'none';
+            }
         });
 
-        function startProductSearch() {
-            const url = document.getElementById('productImageUrl').value.trim();
-            if (url) {
-                searchProductByImageUrl(url);
+        // Bild zu Base64 konvertieren
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Ergebnisse anzeigen
+        function showResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            
+            if (data.success && data.results && data.results.length > 0) {
+                let html = `<h2 class="results-title">${data.message}</h2>`;
+                
+                // Sortiere nach Confidence (höchste zuerst)
+                const sortedResults = data.results.sort((a, b) => b.confidence - a.confidence);
+                
+                sortedResults.forEach(product => {
+                    const confidencePercent = Math.round(product.confidence * 100);
+                    const isExactMatch = product.type === 'exact_match';
+                    const cardClass = isExactMatch ? 'product-card exact-match' : 'product-card';
+                    
+                    html += `
+                        <div class="${cardClass}">
+                            <img src="${product.image}" alt="${product.title}" class="product-image">
+                            <div class="product-info">
+                                <div class="product-title">
+                                    ${product.title}
+                                    ${isExactMatch ? '<span class="exact-match-badge">EXAKT</span>' : ''}
+                                </div>
+                                <div class="product-price">${product.price}</div>
+                                <div class="product-shop">${product.shop}</div>
+                                <div class="product-confidence">${confidencePercent}% Übereinstimmung</div>
+                                <a href="${product.link}" target="_blank" class="product-link">
+                                    🛒 Jetzt kaufen bei ${product.shop}
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resultsSection.innerHTML = html;
             } else {
-                alert('Bitte URL eingeben');
+                resultsSection.innerHTML = `
+                    <div class="error-message">
+                        <h3>❌ Keine Produkte gefunden</h3>
+                        <p>Versuche ein klareres Bild oder ein Produkt von bekannten Marken wie G-Star, Nike, Adidas etc.</p>
+                    </div>
+                `;
             }
         }
 
-        console.log('✅ App geladen - OHNE Tesseract!');
+        // Drag & Drop Support
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadInput = document.getElementById('imageUpload');
+            
+            // Drag and Drop
+            uploadInput.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#27ae60';
+                this.style.background = '#e8f6f3';
+            });
+            
+            uploadInput.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#3498db';
+                this.style.background = '#f8f9fa';
+            });
+            
+            uploadInput.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#3498db';
+                this.style.background = '#f8f9fa';
+                
+                if (e.dataTransfer.files.length) {
+                    this.files = e.dataTransfer.files;
+                    const event = new Event('change', { bubbles: true });
+                    this.dispatchEvent(event);
+                }
+            });
+            
+            console.log('🛍️ Automatische Produktsuche bereit!');
+        });
     </script>
 </body>
 </html>
