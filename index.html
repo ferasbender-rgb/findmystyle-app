@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Al-Qamar Fashion - Automatische Produktsuche</title>
+    <title>Deutscher Mode-Preisvergleich - Finde das beste Angebot</title>
     <style>
         * {
             margin: 0;
@@ -228,6 +228,33 @@
             border: 1px solid #c3e6cb;
         }
         
+        .best-deal-banner {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #ffd700;
+            text-align: center;
+        }
+        
+        .summary-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -258,8 +285,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ Al-Qamar Fashion</h1>
-        <p class="subtitle">Lade ein Produktbild hoch - wir finden es automatisch in allen Shops!</p>
+        <h1>🛍️ Deutscher Mode-Preisvergleich</h1>
+        <p class="subtitle">Lade ein Bild hoch und finde das beste Angebot in deutschen Shops!</p>
         
         <div class="upload-section">
             <input type="file" id="imageUpload" accept="image/*">
@@ -268,17 +295,17 @@
 
         <div class="loading" id="loadingSection">
             <div class="spinner"></div>
-            <p class="loading-text">🔍 Analysiere Bild und durchsuche Shops...</p>
-            <p>Dies kann einige Sekunden dauern</p>
+            <p class="loading-text">🔍 Durchsuche deutsche Shops...</p>
+            <p>Vergleiche Preise bei Zalando, About You, Otto & mehr</p>
         </div>
 
         <div class="results" id="resultsSection">
-            <!-- Hier kommen die Produktergebnisse -->
+            <!-- Hier kommen die Preisvergleich-Ergebnisse -->
         </div>
     </div>
 
     <script>
-        // EINFACHE FUNKTION - GARANTIERT FUNKTIONIEREND
+        // DEUTSCHER PREISVERGLEICH
         document.getElementById('imageUpload').addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -292,75 +319,152 @@
             document.getElementById('resultsSection').innerHTML = '';
 
             try {
-                // Einfache Base64 Konvertierung
+                // Bild zu Base64
                 const imageBase64 = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result);
                     reader.readAsDataURL(file);
                 });
                 
-                console.log('📤 Sende Bild...');
+                console.log('🔍 Starte deutschen Preisvergleich...');
                 
-                // FETCH mit einfachem Error Handling
-                const response = await fetch('/api/analyze-image', {
+                // Preisvergleich starten
+                const response = await fetch('/api/price-comparison', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ imageData: imageBase64 })
+                    body: JSON.stringify({ 
+                        productName: 'Ähnliches Produkt',
+                        imageData: imageBase64 
+                    })
                 });
 
-                // Prüfe ob Response ok ist
                 if (!response.ok) throw new Error('Server Fehler: ' + response.status);
                 
-                // JSON parsen
                 const data = await response.json();
-                console.log('✅ Erfolg:', data);
+                console.log('✅ Preisvergleich erhalten:', data);
                 
-                // Zeige Ergebnisse
-                showResults(data);
+                // Ergebnisse anzeigen
+                showPriceComparison(data);
                 
             } catch (error) {
                 console.error('❌ Fehler:', error);
                 document.getElementById('resultsSection').innerHTML = 
-                    '<div class="error-message">❌ Server nicht erreichbar. Bitte später versuchen.</div>';
+                    '<div class="error-message">❌ Preisvergleich fehlgeschlagen: ' + error.message + '</div>';
             } finally {
                 document.getElementById('loadingSection').style.display = 'none';
             }
         });
 
-        function showResults(data) {
+        // PREISVERGLEICH ANZEIGEN
+        function showPriceComparison(data) {
             const resultsSection = document.getElementById('resultsSection');
             
-            if (data.success && data.results) {
-                let html = `<h2 class="results-title">${data.message}</h2>`;
+            if (data.success && data.priceComparison) {
+                let html = `
+                    <h2 class="results-title">${data.message || 'Preisvergleich gefunden!'}</h2>
+                    <div class="best-deal-banner">
+                        <h3>🎯 Bestes Angebot: ${data.bestDeal.shop} für ${data.bestDeal.price}</h3>
+                        <p>${data.bestDeal.shipping} | ${data.bestDeal.delivery}</p>
+                    </div>
+                `;
                 
-                data.results.forEach(product => {
-                    const confidencePercent = Math.round(product.confidence * 100);
+                data.priceComparison.forEach(offer => {
+                    const isBestDeal = offer.shop === data.bestDeal.shop;
+                    const cardClass = isBestDeal ? 'product-card exact-match' : 'product-card';
                     
                     html += `
-                        <div class="product-card">
-                            <img src="${product.image}" class="product-image">
+                        <div class="${cardClass}">
                             <div class="product-info">
-                                <div class="product-title">${product.title}</div>
-                                <div class="product-price">${product.price}</div>
-                                <div class="product-shop">${product.shop}</div>
-                                <div class="product-confidence">${confidencePercent}% Übereinstimmung</div>
-                                <a href="${product.link}" target="_blank" class="product-link">
-                                    🛒 Bei ${product.shop} kaufen
+                                <div class="product-title">
+                                    ${offer.shop}
+                                    ${offer.badge ? `<span class="badge">${offer.badge}</span>` : ''}
+                                    ${isBestDeal ? '<span class="exact-match-badge">BESTES ANGEBOT</span>' : ''}
+                                </div>
+                                <div class="product-price">
+                                    ${offer.price} 
+                                    ${offer.originalPrice ? `<span style="text-decoration:line-through; color:#999; font-size:14px; margin-left:8px;">${offer.originalPrice}</span>` : ''}
+                                </div>
+                                <div class="product-shop">
+                                    📦 Versand: ${offer.shipping} | 🚚 Lieferung: ${offer.delivery} | ${offer.inStock ? '✅ Auf Lager' : '❌ Nicht verfügbar'}
+                                </div>
+                                <a href="${offer.link}" target="_blank" class="product-link">
+                                    🛒 Bei ${offer.shop} kaufen
                                 </a>
                             </div>
                         </div>
                     `;
                 });
                 
+                // Zusammenfassung
+                html += `
+                    <div class="summary-box">
+                        <h3>📊 Zusammenfassung</h3>
+                        <p><strong>💰 Günstigster:</strong> ${data.summary.cheapest.shop} für ${data.summary.cheapest.price}</p>
+                        <p><strong>⚡ Schnellste Lieferung:</strong> ${data.summary.fastest.shop} (${data.summary.fastest.delivery})</p>
+                        <p><strong>🛍️ Shops verglichen:</strong> ${data.priceComparison.length} deutsche Online-Shops</p>
+                    </div>
+                `;
+                
                 resultsSection.innerHTML = html;
+            } else {
+                resultsSection.innerHTML = `
+                    <div class="error-message">
+                        <h3>❌ Keine Angebote in deutschen Shops gefunden</h3>
+                        <p>Versuche ein anderes Bild oder Produkt. Wir durchsuchen Zalando, About You, Otto und mehr.</p>
+                    </div>
+                `;
             }
         }
 
-        // Server Test beim Start
-        fetch('/api/test')
-            .then(r => r.json())
-            .then(data => console.log('Server OK:', data))
-            .catch(err => console.log('Server Fehler:', err));
+        // SHOP-LISTE LADEN
+        async function loadGermanShops() {
+            try {
+                const response = await fetch('/api/german-shops');
+                const data = await response.json();
+                console.log('🛍️ Deutsche Shops geladen:', data.shops.length);
+            } catch (error) {
+                console.log('Shops konnten nicht geladen werden');
+            }
+        }
+
+        // Drag & Drop Support
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadInput = document.getElementById('imageUpload');
+            
+            // Drag and Drop
+            uploadInput.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#27ae60';
+                this.style.background = '#e8f6f3';
+            });
+            
+            uploadInput.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#3498db';
+                this.style.background = '#f8f9fa';
+            });
+            
+            uploadInput.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#3498db';
+                this.style.background = '#f8f9fa';
+                
+                if (e.dataTransfer.files.length) {
+                    this.files = e.dataTransfer.files;
+                    const event = new Event('change', { bubbles: true });
+                    this.dispatchEvent(event);
+                }
+            });
+            
+            console.log('🛍️ Deutscher Mode-Preisvergleich gestartet');
+            loadGermanShops();
+            
+            // Teste Server
+            fetch('/api/test')
+                .then(r => r.json())
+                .then(data => console.log('Server OK:', data.message))
+                .catch(err => console.log('Server Fehler:', err));
+        });
     </script>
 </body>
 </html>
