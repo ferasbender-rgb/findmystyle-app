@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deutscher Mode-Preisvergleich - Finde das beste Angebot</title>
+    <title>Intelligenter Mode-Preisvergleich - KI-gestützte Suche</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
@@ -14,6 +14,9 @@
         .search-section { text-align: center; margin-bottom: 30px; }
         #productSearch { padding: 15px; border: 2px solid #3498db; border-radius: 8px; width: 70%; font-size: 16px; margin-right: 10px; }
         #searchButton { background: #3498db; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        
+        .intent-section { background: #e8f4fc; padding: 15px; border-radius: 10px; margin: 20px 0; display: none; }
+        .intent-badge { background: #3498db; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; margin: 0 5px; }
         
         .loading { display: none; text-align: center; margin: 30px 0; padding: 30px; background: #f8f9fa; border-radius: 10px; }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
@@ -32,6 +35,7 @@
         .best-deal-banner { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #856404; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #ffd700; text-align: center; }
         .summary-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #3498db; }
         .badge { background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px; }
+        .rating { color: #f39c12; font-weight: bold; }
         
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
@@ -46,26 +50,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ Deutscher Mode-Preisvergleich</h1>
-        <p class="subtitle">Gib ein Produkt ein und finde das beste Angebot in deutschen Shops!</p>
+        <h1>🧠 Intelligenter Mode-Preisvergleich</h1>
+        <p class="subtitle">KI-gestützte Suche - Versteht was du wirklich suchst!</p>
         
         <div class="search-section">
-            <input type="text" id="productSearch" placeholder="z.B. 'Calvin Klein Jeans', 'Nike Air Force', 'Adidas Hoodie'...">
-            <button id="searchButton" onclick="searchProduct()">🔍 Preisvergleich starten</button>
+            <input type="text" id="productSearch" placeholder="z.B. 'Slim Fit Jeans Blau Wrangler', 'Nike Air Force Weiß'...">
+            <button id="searchButton" onclick="searchProduct()">🔍 Intelligente Suche</button>
+        </div>
+
+        <div class="intent-section" id="intentSection">
+            <h3>🎯 KI-Analyse deiner Suche:</h3>
+            <div id="intentDetails"></div>
         </div>
 
         <div class="loading" id="loadingSection">
             <div class="spinner"></div>
-            <p>Durchsuche Zalando, About You, Otto, Amazon...</p>
+            <p>🧠 Analysiere Suchintent und vergleiche Preise...</p>
         </div>
 
-        <div class="results" id="resultsSection">
-            <!-- Hier kommen die Preisvergleich-Ergebnisse -->
-        </div>
+        <div class="results" id="resultsSection"></div>
     </div>
 
     <script>
-        // PRODUKT-SUCHE
+        // INTELLIGENTE PRODUKT-SUCHE
         function searchProduct() {
             const productName = document.getElementById('productSearch').value.trim();
             
@@ -77,8 +84,9 @@
             // Ladeanimation
             document.getElementById('loadingSection').style.display = 'block';
             document.getElementById('resultsSection').innerHTML = '';
+            document.getElementById('intentSection').style.display = 'none';
 
-            // Produktsuche starten
+            // Intelligente Suche starten
             fetch('/api/search-product', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -87,46 +95,57 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('loadingSection').style.display = 'none';
+                showIntentAnalysis(data);
                 showPriceComparison(data);
             })
             .catch(error => {
                 document.getElementById('loadingSection').style.display = 'none';
                 document.getElementById('resultsSection').innerHTML = 
-                    '<div style="background:#f8d7da; color:#721c24; padding:20px; border-radius:10px;">❌ Suche fehlgeschlagen</div>';
+                    '<div style="background:#f8d7da; color:#721c24; padding:20px; border-radius:10px;">❌ Intelligente Suche fehlgeschlagen</div>';
             });
         }
 
-        // Enter-Taste unterstützen
-        document.getElementById('productSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchProduct();
+        // INTENT-ANALYSE ANZEIGEN
+        function showIntentAnalysis(data) {
+            if (data.detectedIntent) {
+                const intent = data.detectedIntent;
+                let intentHTML = '';
+                
+                if (intent.category) {
+                    intentHTML += `<span class="intent-badge">Kategorie: ${intent.category}</span>`;
+                }
+                if (intent.brand) {
+                    intentHTML += `<span class="intent-badge">Marke: ${intent.brand}</span>`;
+                }
+                if (intent.fit) {
+                    intentHTML += `<span class="intent-badge">Passform: ${intent.fit}</span>`;
+                }
+                if (intent.color) {
+                    intentHTML += `<span class="intent-badge">Farbe: ${intent.color}</span>`;
+                }
+                
+                if (intentHTML) {
+                    document.getElementById('intentDetails').innerHTML = intentHTML;
+                    document.getElementById('intentSection').style.display = 'block';
+                }
             }
-        });
+        }
 
         // PREISVERGLEICH ANZEIGEN
         function showPriceComparison(data) {
             const resultsSection = document.getElementById('resultsSection');
             
             if (data.success && data.results && data.results.length > 0) {
-                // Best Deal finden
-                const bestDeal = data.results
-                    .filter(item => item.inStock)
-                    .sort((a, b) => {
-                        const priceA = parseFloat(a.price.replace('€', '').replace(',', '.'));
-                        const priceB = parseFloat(b.price.replace('€', '').replace(',', '.'));
-                        return priceA - priceB;
-                    })[0];
-
                 let html = `
                     <h2 style="text-align:center; color:#2c3e50; margin-bottom:20px;">${data.message}</h2>
                     <div class="best-deal-banner">
-                        <h3>🎯 Bestes Angebot: ${bestDeal.shop} für ${bestDeal.price}</h3>
-                        <p>${bestDeal.shipping} | ${bestDeal.delivery}</p>
+                        <h3>🎯 Bestes Angebot: ${data.bestDeal.shop} für ${data.bestDeal.price}</h3>
+                        <p>${data.bestDeal.shipping} | ${data.bestDeal.delivery}</p>
                     </div>
                 `;
                 
                 data.results.forEach(offer => {
-                    const isBestDeal = offer.shop === bestDeal.shop;
+                    const isBestDeal = offer.shop === data.bestDeal.shop;
                     const cardStyle = isBestDeal ? 'product-card exact-match' : 'product-card';
                     
                     html += `
@@ -143,7 +162,8 @@
                                     ${offer.originalPrice ? `<span style="text-decoration:line-through; color:#999; font-size:14px; margin-left:8px;">${offer.originalPrice}</span>` : ''}
                                 </div>
                                 <div class="product-shop">
-                                    🏪 ${offer.shop} | 📦 ${offer.shipping} | 🚚 ${offer.delivery}
+                                    🏪 ${offer.shop} | 📦 ${offer.shipping} | 🚚 ${offer.delivery} | ⭐ ${offer.rating}/5
+                                    ${!offer.inStock ? ' | ❌ Nicht auf Lager' : ''}
                                 </div>
                                 <a href="${offer.link}" target="_blank" class="product-link">
                                     🛒 Bei ${offer.shop} kaufen
@@ -156,11 +176,12 @@
                 // Zusammenfassung
                 html += `
                     <div class="summary-box">
-                        <h3>📊 Zusammenfassung</h3>
-                        <p><strong>🔍 Gesucht:</strong> "${data.searchQuery}"</p>
-                        <p><strong>💰 Günstigster:</strong> ${bestDeal.shop} für ${bestDeal.price}</p>
-                        <p><strong>🛍️ Shops verglichen:</strong> ${data.shops.join(', ')}</p>
-                        <p><strong>📈 Angebote gefunden:</strong> ${data.totalResults}</p>
+                        <h3>📊 Intelligente Suche - Zusammenfassung</h3>
+                        <p><strong>🔍 Ursprüngliche Suche:</strong> "${data.searchQuery}"</p>
+                        <p><strong>🎯 KI-Erkennung:</strong> ${Object.values(data.detectedIntent).filter(val => val).join(', ')}</p>
+                        <p><strong>💰 Günstigster:</strong> ${data.bestDeal.shop} für ${data.bestDeal.price}</p>
+                        <p><strong>🛍️ Shops verglichen:</strong> ${data.results.length} Angebote</p>
+                        <p><strong>🧠 Features:</strong> ${data.features.join(', ')}</p>
                     </div>
                 `;
                 
@@ -168,17 +189,24 @@
             } else {
                 resultsSection.innerHTML = `
                     <div style="background:#f8d7da; color:#721c24; padding:20px; border-radius:10px; text-align:center;">
-                        <h3>❌ Keine Angebote gefunden</h3>
-                        <p>Für "${data.searchQuery}" wurden keine Produkte in deutschen Shops gefunden.</p>
-                        <p>Versuche einen anderen Suchbegriff wie "Jeans", "Nike Schuhe" oder "Adidas Hoodie".</p>
+                        <h3>❌ Keine intelligenten Ergebnisse gefunden</h3>
+                        <p>Für "${data.searchQuery}" wurden keine passenden Produkte gefunden.</p>
+                        <p>Versuche spezifischere Suchbegriffe wie "Wrangler Jeans Slim Fit Blau".</p>
                     </div>
                 `;
             }
         }
 
+        // Enter-Taste unterstützen
+        document.getElementById('productSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProduct();
+            }
+        });
+
         // App starten
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🛍️ Deutscher Produkt-Preisvergleich gestartet');
+            console.log('🧠 Intelligenter Preisvergleich gestartet');
         });
     </script>
 </body>
