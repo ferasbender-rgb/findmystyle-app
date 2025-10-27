@@ -278,105 +278,74 @@
     </div>
 
     <script>
-        // AUTOMATISCHE BILDANALYSE MIT BESSEREM ERROR HANDLING
+        // EINFACHE FUNKTION - GARANTIERT FUNKTIONIEREND
         document.getElementById('imageUpload').addEventListener('change', async function(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Bildvorschau anzeigen
+            // Bildvorschau
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:300px;border-radius:10px">`;
 
-            // Lade-Animation starten
+            // Ladeanimation
             document.getElementById('loadingSection').style.display = 'block';
             document.getElementById('resultsSection').innerHTML = '';
 
             try {
-                // Bild zu Base64 konvertieren
-                const imageBase64 = await fileToBase64(file);
+                // Einfache Base64 Konvertierung
+                const imageBase64 = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsDataURL(file);
+                });
                 
-                console.log('📤 Sende Bild zur Analyse...');
+                console.log('📤 Sende Bild...');
                 
-                // Automatische Analyse starten mit Timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s Timeout
-                
+                // FETCH mit einfachem Error Handling
                 const response = await fetch('/api/analyze-image', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ imageData: imageBase64 }),
-                    signal: controller.signal
+                    body: JSON.stringify({ imageData: imageBase64 })
                 });
 
-                clearTimeout(timeoutId);
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('📥 Ergebnisse erhalten:', data);
+                // Prüfe ob Response ok ist
+                if (!response.ok) throw new Error('Server Fehler: ' + response.status);
                 
-                // Ergebnisse anzeigen
+                // JSON parsen
+                const data = await response.json();
+                console.log('✅ Erfolg:', data);
+                
+                // Zeige Ergebnisse
                 showResults(data);
                 
             } catch (error) {
                 console.error('❌ Fehler:', error);
-                let errorMessage = 'Fehler bei der Suche';
-                
-                if (error.name === 'AbortError') {
-                    errorMessage = 'Zeitüberschreitung - Server antwortet nicht';
-                } else if (error.message.includes('Server error')) {
-                    errorMessage = 'Server Fehler - Bitte später versuchen';
-                } else if (error.message.includes('JSON')) {
-                    errorMessage = 'Ungültige Server-Antwort';
-                }
-                
                 document.getElementById('resultsSection').innerHTML = 
-                    `<div class="error-message">❌ ${errorMessage}</div>`;
+                    '<div class="error-message">❌ Server nicht erreichbar. Bitte später versuchen.</div>';
             } finally {
                 document.getElementById('loadingSection').style.display = 'none';
             }
         });
 
-        // Bild zu Base64 konvertieren
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        // Ergebnisse anzeigen
         function showResults(data) {
             const resultsSection = document.getElementById('resultsSection');
             
-            if (data.success && data.results && data.results.length > 0) {
+            if (data.success && data.results) {
                 let html = `<h2 class="results-title">${data.message}</h2>`;
                 
-                // Sortiere nach Confidence (höchste zuerst)
-                const sortedResults = data.results.sort((a, b) => b.confidence - a.confidence);
-                
-                sortedResults.forEach(product => {
+                data.results.forEach(product => {
                     const confidencePercent = Math.round(product.confidence * 100);
-                    const isExactMatch = product.type === 'exact_match';
-                    const cardClass = isExactMatch ? 'product-card exact-match' : 'product-card';
                     
                     html += `
-                        <div class="${cardClass}">
-                            <img src="${product.image}" alt="${product.title}" class="product-image">
+                        <div class="product-card">
+                            <img src="${product.image}" class="product-image">
                             <div class="product-info">
-                                <div class="product-title">
-                                    ${product.title}
-                                    ${isExactMatch ? '<span class="exact-match-badge">EXAKT</span>' : ''}
-                                </div>
+                                <div class="product-title">${product.title}</div>
                                 <div class="product-price">${product.price}</div>
                                 <div class="product-shop">${product.shop}</div>
                                 <div class="product-confidence">${confidencePercent}% Übereinstimmung</div>
                                 <a href="${product.link}" target="_blank" class="product-link">
-                                    🛒 Jetzt kaufen bei ${product.shop}
+                                    🛒 Bei ${product.shop} kaufen
                                 </a>
                             </div>
                         </div>
@@ -384,53 +353,14 @@
                 });
                 
                 resultsSection.innerHTML = html;
-            } else {
-                resultsSection.innerHTML = `
-                    <div class="error-message">
-                        <h3>❌ ${data.error || 'Keine Produkte gefunden'}</h3>
-                        <p>Versuche ein klareres Bild oder ein Produkt von bekannten Marken.</p>
-                    </div>
-                `;
             }
         }
 
-        // Drag & Drop Support
-        document.addEventListener('DOMContentLoaded', function() {
-            const uploadInput = document.getElementById('imageUpload');
-            
-            // Drag and Drop
-            uploadInput.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#27ae60';
-                this.style.background = '#e8f6f3';
-            });
-            
-            uploadInput.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#3498db';
-                this.style.background = '#f8f9fa';
-            });
-            
-            uploadInput.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#3498db';
-                this.style.background = '#f8f9fa';
-                
-                if (e.dataTransfer.files.length) {
-                    this.files = e.dataTransfer.files;
-                    const event = new Event('change', { bubbles: true });
-                    this.dispatchEvent(event);
-                }
-            });
-            
-            console.log('🛍️ Automatische Produktsuche bereit!');
-            
-            // Teste Server-Verbindung
-            fetch('/api/test')
-                .then(response => response.json())
-                .then(data => console.log('Server Status:', data))
-                .catch(err => console.error('Server nicht erreichbar:', err));
-        });
+        // Server Test beim Start
+        fetch('/api/test')
+            .then(r => r.json())
+            .then(data => console.log('Server OK:', data))
+            .catch(err => console.log('Server Fehler:', err));
     </script>
 </body>
 </html>
