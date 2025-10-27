@@ -3,300 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Deutscher Mode-Preisvergleich - Finde das beste Angebot</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 30px; font-size: 1.1em; }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+        .search-section { text-align: center; margin-bottom: 30px; }
+        #productSearch { padding: 15px; border: 2px solid #3498db; border-radius: 8px; width: 70%; font-size: 16px; margin-right: 10px; }
+        #searchButton { background: #3498db; color: white; border: none; padding: 15px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; }
         
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+        .loading { display: none; text-align: center; margin: 30px 0; padding: 30px; background: #f8f9fa; border-radius: 10px; }
+        .spinner { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
+        .results { margin-top: 30px; }
+        .product-card { border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; margin: 20px 0; display: flex; gap: 20px; align-items: flex-start; transition: all 0.3s ease; background: white; }
+        .product-card:hover { border-color: #3498db; box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2); transform: translateY(-2px); }
+        .product-image { width: 140px; height: 140px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .product-info { flex: 1; }
+        .product-title { font-weight: bold; font-size: 1.3em; margin-bottom: 8px; color: #2c3e50; }
+        .product-price { color: #e74c3c; font-weight: bold; font-size: 1.4em; margin-bottom: 8px; }
+        .product-shop { color: #7f8c8d; margin-bottom: 10px; font-size: 1em; }
+        .product-link { background: linear-gradient(135deg, #27ae60, #2ecc71); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s ease; }
+        .product-link:hover { transform: translateY(-2px); color: white; text-decoration: none; }
         
-        .subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
+        .best-deal-banner { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #856404; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #ffd700; text-align: center; }
+        .summary-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #3498db; }
+        .badge { background: #ff6b6b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px; }
         
-        .upload-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        #imageUpload {
-            padding: 20px;
-            border: 3px dashed #3498db;
-            border-radius: 12px;
-            background: #f8f9fa;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        #imageUpload:hover {
-            border-color: #2980b9;
-            background: #e8f4fc;
-        }
-        
-        #imagePreview {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        #imagePreview img {
-            max-width: 300px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 30px 0;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        .loading-text {
-            font-size: 1.2em;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-        
-        .results {
-            margin-top: 30px;
-        }
-        
-        .results-title {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-        
-        .product-card {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        
-        .product-card:hover {
-            border-color: #3498db;
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        .product-image {
-            width: 140px;
-            height: 140px;
-            object-fit: cover;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-        
-        .product-info {
-            flex: 1;
-        }
-        
-        .product-title {
-            font-weight: bold;
-            font-size: 1.3em;
-            margin-bottom: 8px;
-            color: #2c3e50;
-        }
-        
-        .product-price {
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 1.4em;
-            margin-bottom: 8px;
-        }
-        
-        .product-shop {
-            color: #7f8c8d;
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-        
-        .product-confidence {
-            background: #3498db;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-        
-        .product-link {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
-        }
-        
-        .product-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-        
-        .exact-match {
-            border-color: #27ae60;
-            background: linear-gradient(135deg, #f8fff9, #ffffff);
-        }
-        
-        .exact-match-badge {
-            background: #27ae60;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px 0;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .best-deal-banner {
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            color: #856404;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 2px solid #ffd700;
-            text-align: center;
-        }
-        
-        .summary-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .badge {
-            background: #ff6b6b;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .product-card {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .product-image {
-                width: 200px;
-                height: 200px;
-                margin: 0 auto;
-            }
+            .container { padding: 20px; margin: 10px; }
+            h1 { font-size: 2em; }
+            #productSearch { width: 100%; margin-bottom: 10px; }
+            .product-card { flex-direction: column; text-align: center; }
+            .product-image { width: 200px; height: 200px; margin: 0 auto; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🛍️ Deutscher Mode-Preisvergleich</h1>
-        <p class="subtitle">Lade ein Bild hoch und finde das beste Angebot in deutschen Shops!</p>
+        <p class="subtitle">Gib ein Produkt ein und finde das beste Angebot in deutschen Shops!</p>
         
-        <div class="upload-section">
-            <input type="file" id="imageUpload" accept="image/*">
-            <div id="imagePreview"></div>
+        <div class="search-section">
+            <input type="text" id="productSearch" placeholder="z.B. 'Calvin Klein Jeans', 'Nike Air Force', 'Adidas Hoodie'...">
+            <button id="searchButton" onclick="searchProduct()">🔍 Preisvergleich starten</button>
         </div>
 
         <div class="loading" id="loadingSection">
             <div class="spinner"></div>
-            <p class="loading-text">🔍 Durchsuche deutsche Shops...</p>
-            <p>Vergleiche Preise bei Zalando, About You, Otto & mehr</p>
+            <p>Durchsuche Zalando, About You, Otto, Amazon...</p>
         </div>
 
         <div class="results" id="resultsSection">
@@ -305,53 +65,41 @@
     </div>
 
     <script>
-        // DEUTSCHER PREISVERGLEICH
-        document.getElementById('imageUpload').addEventListener('change', async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Bildvorschau
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:300px;border-radius:10px">`;
+        // PRODUKT-SUCHE
+        function searchProduct() {
+            const productName = document.getElementById('productSearch').value.trim();
+            
+            if (!productName) {
+                alert('Bitte gib ein Produkt ein');
+                return;
+            }
 
             // Ladeanimation
             document.getElementById('loadingSection').style.display = 'block';
             document.getElementById('resultsSection').innerHTML = '';
 
-            try {
-                // Bild zu Base64
-                const imageBase64 = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.readAsDataURL(file);
-                });
-                
-                console.log('🔍 Starte deutschen Preisvergleich...');
-                
-                // Preisvergleich starten
-                const response = await fetch('/api/price-comparison', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        productName: 'Ähnliches Produkt',
-                        imageData: imageBase64 
-                    })
-                });
-
-                if (!response.ok) throw new Error('Server Fehler: ' + response.status);
-                
-                const data = await response.json();
-                console.log('✅ Preisvergleich erhalten:', data);
-                
-                // Ergebnisse anzeigen
-                showPriceComparison(data);
-                
-            } catch (error) {
-                console.error('❌ Fehler:', error);
-                document.getElementById('resultsSection').innerHTML = 
-                    '<div class="error-message">❌ Preisvergleich fehlgeschlagen: ' + error.message + '</div>';
-            } finally {
+            // Produktsuche starten
+            fetch('/api/search-product', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ productName: productName })
+            })
+            .then(response => response.json())
+            .then(data => {
                 document.getElementById('loadingSection').style.display = 'none';
+                showPriceComparison(data);
+            })
+            .catch(error => {
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('resultsSection').innerHTML = 
+                    '<div style="background:#f8d7da; color:#721c24; padding:20px; border-radius:10px;">❌ Suche fehlgeschlagen</div>';
+            });
+        }
+
+        // Enter-Taste unterstützen
+        document.getElementById('productSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchProduct();
             }
         });
 
@@ -359,33 +107,43 @@
         function showPriceComparison(data) {
             const resultsSection = document.getElementById('resultsSection');
             
-            if (data.success && data.priceComparison) {
+            if (data.success && data.results && data.results.length > 0) {
+                // Best Deal finden
+                const bestDeal = data.results
+                    .filter(item => item.inStock)
+                    .sort((a, b) => {
+                        const priceA = parseFloat(a.price.replace('€', '').replace(',', '.'));
+                        const priceB = parseFloat(b.price.replace('€', '').replace(',', '.'));
+                        return priceA - priceB;
+                    })[0];
+
                 let html = `
-                    <h2 class="results-title">${data.message || 'Preisvergleich gefunden!'}</h2>
+                    <h2 style="text-align:center; color:#2c3e50; margin-bottom:20px;">${data.message}</h2>
                     <div class="best-deal-banner">
-                        <h3>🎯 Bestes Angebot: ${data.bestDeal.shop} für ${data.bestDeal.price}</h3>
-                        <p>${data.bestDeal.shipping} | ${data.bestDeal.delivery}</p>
+                        <h3>🎯 Bestes Angebot: ${bestDeal.shop} für ${bestDeal.price}</h3>
+                        <p>${bestDeal.shipping} | ${bestDeal.delivery}</p>
                     </div>
                 `;
                 
-                data.priceComparison.forEach(offer => {
-                    const isBestDeal = offer.shop === data.bestDeal.shop;
-                    const cardClass = isBestDeal ? 'product-card exact-match' : 'product-card';
+                data.results.forEach(offer => {
+                    const isBestDeal = offer.shop === bestDeal.shop;
+                    const cardStyle = isBestDeal ? 'product-card exact-match' : 'product-card';
                     
                     html += `
-                        <div class="${cardClass}">
+                        <div class="${cardStyle}">
+                            <img src="${offer.image}" alt="${offer.product}" class="product-image">
                             <div class="product-info">
                                 <div class="product-title">
-                                    ${offer.shop}
+                                    ${offer.product}
                                     ${offer.badge ? `<span class="badge">${offer.badge}</span>` : ''}
-                                    ${isBestDeal ? '<span class="exact-match-badge">BESTES ANGEBOT</span>' : ''}
+                                    ${isBestDeal ? '<span style="background:#27ae60; color:white; padding:4px 12px; border-radius:20px; font-size:0.8em; margin-left:10px;">BESTES ANGEBOT</span>' : ''}
                                 </div>
                                 <div class="product-price">
                                     ${offer.price} 
                                     ${offer.originalPrice ? `<span style="text-decoration:line-through; color:#999; font-size:14px; margin-left:8px;">${offer.originalPrice}</span>` : ''}
                                 </div>
                                 <div class="product-shop">
-                                    📦 Versand: ${offer.shipping} | 🚚 Lieferung: ${offer.delivery} | ${offer.inStock ? '✅ Auf Lager' : '❌ Nicht verfügbar'}
+                                    🏪 ${offer.shop} | 📦 ${offer.shipping} | 🚚 ${offer.delivery}
                                 </div>
                                 <a href="${offer.link}" target="_blank" class="product-link">
                                     🛒 Bei ${offer.shop} kaufen
@@ -399,71 +157,28 @@
                 html += `
                     <div class="summary-box">
                         <h3>📊 Zusammenfassung</h3>
-                        <p><strong>💰 Günstigster:</strong> ${data.summary.cheapest.shop} für ${data.summary.cheapest.price}</p>
-                        <p><strong>⚡ Schnellste Lieferung:</strong> ${data.summary.fastest.shop} (${data.summary.fastest.delivery})</p>
-                        <p><strong>🛍️ Shops verglichen:</strong> ${data.priceComparison.length} deutsche Online-Shops</p>
+                        <p><strong>🔍 Gesucht:</strong> "${data.searchQuery}"</p>
+                        <p><strong>💰 Günstigster:</strong> ${bestDeal.shop} für ${bestDeal.price}</p>
+                        <p><strong>🛍️ Shops verglichen:</strong> ${data.shops.join(', ')}</p>
+                        <p><strong>📈 Angebote gefunden:</strong> ${data.totalResults}</p>
                     </div>
                 `;
                 
                 resultsSection.innerHTML = html;
             } else {
                 resultsSection.innerHTML = `
-                    <div class="error-message">
-                        <h3>❌ Keine Angebote in deutschen Shops gefunden</h3>
-                        <p>Versuche ein anderes Bild oder Produkt. Wir durchsuchen Zalando, About You, Otto und mehr.</p>
+                    <div style="background:#f8d7da; color:#721c24; padding:20px; border-radius:10px; text-align:center;">
+                        <h3>❌ Keine Angebote gefunden</h3>
+                        <p>Für "${data.searchQuery}" wurden keine Produkte in deutschen Shops gefunden.</p>
+                        <p>Versuche einen anderen Suchbegriff wie "Jeans", "Nike Schuhe" oder "Adidas Hoodie".</p>
                     </div>
                 `;
             }
         }
 
-        // SHOP-LISTE LADEN
-        async function loadGermanShops() {
-            try {
-                const response = await fetch('/api/german-shops');
-                const data = await response.json();
-                console.log('🛍️ Deutsche Shops geladen:', data.shops.length);
-            } catch (error) {
-                console.log('Shops konnten nicht geladen werden');
-            }
-        }
-
-        // Drag & Drop Support
+        // App starten
         document.addEventListener('DOMContentLoaded', function() {
-            const uploadInput = document.getElementById('imageUpload');
-            
-            // Drag and Drop
-            uploadInput.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#27ae60';
-                this.style.background = '#e8f6f3';
-            });
-            
-            uploadInput.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#3498db';
-                this.style.background = '#f8f9fa';
-            });
-            
-            uploadInput.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.style.borderColor = '#3498db';
-                this.style.background = '#f8f9fa';
-                
-                if (e.dataTransfer.files.length) {
-                    this.files = e.dataTransfer.files;
-                    const event = new Event('change', { bubbles: true });
-                    this.dispatchEvent(event);
-                }
-            });
-            
-            console.log('🛍️ Deutscher Mode-Preisvergleich gestartet');
-            loadGermanShops();
-            
-            // Teste Server
-            fetch('/api/test')
-                .then(r => r.json())
-                .then(data => console.log('Server OK:', data.message))
-                .catch(err => console.log('Server Fehler:', err));
+            console.log('🛍️ Deutscher Produkt-Preisvergleich gestartet');
         });
     </script>
 </body>
