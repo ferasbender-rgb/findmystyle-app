@@ -6,7 +6,7 @@ async function searchProductByImageUrl(imageUrl) {
         // Zeige Lade-Animation
         const resultDiv = document.getElementById('ocrResult');
         const brandResult = document.getElementById('brandResult');
-        resultDiv.textContent = 'Suche Produkt...';
+        resultDiv.textContent = '🔍 Suche Produkt...';
         brandResult.textContent = 'Analysiere Bild-URL...';
 
         // Sende Request an dein Backend
@@ -22,34 +22,39 @@ async function searchProductByImageUrl(imageUrl) {
         
         if (data.success) {
             resultDiv.innerHTML = `
-                <strong>Produkt gefunden!</strong><br>
-                <a href="${data.productLink}" target="_blank" style="color: blue; text-decoration: underline;">
-                    Hier klicken zum Produkt
-                </a>
+                <div style="background: #d4edda; padding: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">
+                    <strong style="color: #155724;">✅ Produkt gefunden!</strong><br><br>
+                    <a href="${data.productLink}" target="_blank" 
+                       style="background: #007bff; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                       🛒 Hier klicken zum Produkt
+                    </a>
+                </div>
             `;
-            brandResult.textContent = `Produktcode: ${data.productCode}`;
-            
-            // Speichere Daten für Feedback
-            window.currentProductData = {
-                imageUrl: imageUrl,
-                productCode: data.productCode,
-                productLink: data.productLink,
-                source: data.source
-            };
+            brandResult.textContent = `📋 Produktcode: ${data.productCode}`;
             
         } else {
-            resultDiv.textContent = '❌ Produkt nicht gefunden';
-            brandResult.textContent = `Fehler: ${data.error}`;
+            resultDiv.innerHTML = `
+                <div style="background: #f8d7da; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">
+                    <strong style="color: #721c24;">❌ Produkt nicht gefunden</strong>
+                    <p>${data.error || 'Bitte versuche ein anderes Bild'}</p>
+                </div>
+            `;
+            brandResult.textContent = '';
         }
         
     } catch (error) {
         console.error('Suchfehler:', error);
-        document.getElementById('ocrResult').textContent = '❌ Fehler bei der Suche';
-        document.getElementById('brandResult').textContent = 'Bitte versuche es später erneut';
+        document.getElementById('ocrResult').innerHTML = `
+            <div style="background: #f8d7da; padding: 15px; border-radius: 5px;">
+                <strong>❌ Fehler bei der Suche</strong>
+                <p>Bitte versuche es später erneut</p>
+            </div>
+        `;
+        document.getElementById('brandResult').textContent = '';
     }
 }
 
-// Bild-Upload verarbeiten (NEUE VERSION)
+// Bild-Upload verarbeiten
 document.getElementById('imageUpload').addEventListener('change', async function(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -57,18 +62,23 @@ document.getElementById('imageUpload').addEventListener('change', async function
     const preview = document.getElementById('imagePreview');
     const resultDiv = document.getElementById('ocrResult');
     const brandResult = document.getElementById('brandResult');
-    const correctionSection = document.getElementById('correctionSection');
 
     // Bildvorschau anzeigen
     preview.innerHTML = '';
     const img = document.createElement('img');
     img.src = URL.createObjectURL(file);
     img.style.maxWidth = '300px';
+    img.style.borderRadius = '5px';
     preview.appendChild(img);
 
     // Zeige Upload-Erfolg an
-    resultDiv.textContent = '✅ Bild hochgeladen!';
-    brandResult.textContent = 'Bereit für URL-Eingabe...';
+    resultDiv.innerHTML = `
+        <div style="background: #d1ecf1; padding: 15px; border-radius: 5px;">
+            <strong>✅ Bild erfolgreich hochgeladen!</strong>
+            <p>Jetzt Bild-URL eingeben um Produkt zu finden</p>
+        </div>
+    `;
+    brandResult.textContent = '';
     
     // Zeige URL-Eingabefeld an
     showUrlInputSection();
@@ -76,35 +86,33 @@ document.getElementById('imageUpload').addEventListener('change', async function
 
 // URL-Eingabe Sektion anzeigen
 function showUrlInputSection() {
-    const urlSection = document.getElementById('urlInputSection');
+    let urlSection = document.getElementById('urlInputSection');
+    
     if (!urlSection) {
-        createUrlInputSection();
+        urlSection = document.createElement('div');
+        urlSection.id = 'urlInputSection';
+        urlSection.style.marginTop = '20px';
+        urlSection.style.padding = '20px';
+        urlSection.style.border = '2px dashed #dee2e6';
+        urlSection.style.borderRadius = '10px';
+        urlSection.style.background = '#f8f9fa';
+        
+        urlSection.innerHTML = `
+            <h3 style="margin-top: 0;">🔗 Bild-URL eingeben</h3>
+            <p>Füge die URL des Produktbildes ein (z.B. von G-Star):</p>
+            <input type="text" id="productImageUrl" 
+                   placeholder="https://img1.g-star.com/..." 
+                   style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ced4da; border-radius: 5px; font-size: 16px;">
+            <button onclick="startProductSearch()" 
+                    style="background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                🛍️ Produkt finden
+            </button>
+        `;
+        
+        document.querySelector('.container').appendChild(urlSection);
     } else {
         urlSection.style.display = 'block';
     }
-}
-
-// URL-Eingabe Sektion erstellen
-function createUrlInputSection() {
-    const container = document.querySelector('.container');
-    
-    const urlSection = document.createElement('div');
-    urlSection.id = 'urlInputSection';
-    urlSection.style.marginTop = '20px';
-    urlSection.style.padding = '15px';
-    urlSection.style.border = '1px solid #ddd';
-    urlSection.style.borderRadius = '5px';
-    
-    urlSection.innerHTML = `
-        <h3>🔗 Bild-URL eingeben</h3>
-        <p>Füge die URL des Produktbildes ein (z.B. von G-Star):</p>
-        <input type="text" id="productImageUrl" placeholder="https://img1.g-star.com/..." style="width: 100%; padding: 10px; margin-bottom: 10px;">
-        <button onclick="startProductSearch()" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
-            🛍️ Produkt finden
-        </button>
-    `;
-    
-    container.appendChild(urlSection);
 }
 
 // Produktsuche starten
@@ -125,45 +133,10 @@ function startProductSearch() {
     searchProductByImageUrl(imageUrl);
 }
 
-// Feedback für Produktsuche
-function submitProductFeedback() {
-    const correctionInput = document.getElementById('brandCorrection');
-    const userFeedback = correctionInput.value.trim();
-    
-    if (!userFeedback) {
-        alert('Bitte gib Feedback ein');
-        return;
-    }
-    
-    if (!window.currentProductData) {
-        alert('Keine Produktdaten verfügbar');
-        return;
-    }
-    
-    // Hier kannst du Feedback speichern
-    console.log('User Feedback:', {
-        productData: window.currentProductData,
-        userFeedback: userFeedback
-    });
-    
-    alert('✅ Feedback gespeichert! Danke für deine Rückmeldung.');
-    
-    // UI zurücksetzen
-    document.getElementById('correctionSection').style.display = 'none';
-    document.getElementById('brandCorrection').value = '';
-}
-
-// App initialisieren (OHNE OCR!)
+// App initialisieren
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🛍️ Produktsuche App gestartet');
+    console.log('🛍️ Produktsuche App gestartet - Ohne OCR!');
     
-    // Event Listener für Korrektur-Button
-    document.getElementById('submitCorrection').addEventListener('click', submitProductFeedback);
-    
-    // Enter-Taste für Feedback-Eingabe
-    document.getElementById('brandCorrection').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            submitProductFeedback();
-        }
-    });
+    // Verstecke Korrektur-Sektion da nicht benötigt
+    document.getElementById('correctionSection').style.display = 'none';
 });
