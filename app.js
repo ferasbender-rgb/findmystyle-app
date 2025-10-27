@@ -6,7 +6,7 @@ async function searchProductByImageUrl(imageUrl) {
         // Zeige Lade-Animation
         const resultDiv = document.getElementById('ocrResult');
         const brandResult = document.getElementById('brandResult');
-        resultDiv.textContent = '🔍 Suche Produkt...';
+        resultDiv.innerHTML = '<div class="info-message"><span class="loading"></span> 🔍 Suche Produkt...</div>';
         brandResult.textContent = 'Analysiere Bild-URL...';
 
         // Sende Request an dein Backend
@@ -22,10 +22,9 @@ async function searchProductByImageUrl(imageUrl) {
         
         if (data.success) {
             resultDiv.innerHTML = `
-                <div style="background: #d4edda; padding: 15px; border-radius: 5px; border: 1px solid #c3e6cb;">
-                    <strong style="color: #155724;">✅ Produkt gefunden!</strong><br><br>
-                    <a href="${data.productLink}" target="_blank" 
-                       style="background: #007bff; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; display: inline-block;">
+                <div class="success-message">
+                    <strong>✅ Produkt gefunden!</strong><br><br>
+                    <a href="${data.productLink}" target="_blank" class="product-link">
                        🛒 Hier klicken zum Produkt
                     </a>
                 </div>
@@ -34,8 +33,8 @@ async function searchProductByImageUrl(imageUrl) {
             
         } else {
             resultDiv.innerHTML = `
-                <div style="background: #f8d7da; padding: 15px; border-radius: 5px; border: 1px solid #f5c6cb;">
-                    <strong style="color: #721c24;">❌ Produkt nicht gefunden</strong>
+                <div class="error-message">
+                    <strong>❌ Produkt nicht gefunden</strong>
                     <p>${data.error || 'Bitte versuche ein anderes Bild'}</p>
                 </div>
             `;
@@ -45,7 +44,7 @@ async function searchProductByImageUrl(imageUrl) {
     } catch (error) {
         console.error('Suchfehler:', error);
         document.getElementById('ocrResult').innerHTML = `
-            <div style="background: #f8d7da; padding: 15px; border-radius: 5px;">
+            <div class="error-message">
                 <strong>❌ Fehler bei der Suche</strong>
                 <p>Bitte versuche es später erneut</p>
             </div>
@@ -68,12 +67,12 @@ document.getElementById('imageUpload').addEventListener('change', async function
     const img = document.createElement('img');
     img.src = URL.createObjectURL(file);
     img.style.maxWidth = '300px';
-    img.style.borderRadius = '5px';
+    img.style.borderRadius = '10px';
     preview.appendChild(img);
 
     // Zeige Upload-Erfolg an
     resultDiv.innerHTML = `
-        <div style="background: #d1ecf1; padding: 15px; border-radius: 5px;">
+        <div class="success-message">
             <strong>✅ Bild erfolgreich hochgeladen!</strong>
             <p>Jetzt Bild-URL eingeben um Produkt zu finden</p>
         </div>
@@ -92,19 +91,19 @@ function showUrlInputSection() {
         urlSection = document.createElement('div');
         urlSection.id = 'urlInputSection';
         urlSection.style.marginTop = '20px';
-        urlSection.style.padding = '20px';
+        urlSection.style.padding = '25px';
         urlSection.style.border = '2px dashed #dee2e6';
         urlSection.style.borderRadius = '10px';
         urlSection.style.background = '#f8f9fa';
         
         urlSection.innerHTML = `
-            <h3 style="margin-top: 0;">🔗 Bild-URL eingeben</h3>
-            <p>Füge die URL des Produktbildes ein (z.B. von G-Star):</p>
+            <h3 style="margin-top: 0; color: #2c3e50;">🔗 Bild-URL eingeben</h3>
+            <p style="color: #7f8c8d; margin-bottom: 15px;">Füge die URL des Produktbildes ein (z.B. von G-Star):</p>
             <input type="text" id="productImageUrl" 
                    placeholder="https://img1.g-star.com/..." 
-                   style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ced4da; border-radius: 5px; font-size: 16px;">
+                   style="width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ced4da; border-radius: 8px; font-size: 16px;">
             <button onclick="startProductSearch()" 
-                    style="background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                    style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; padding: 14px 28px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">
                 🛍️ Produkt finden
             </button>
         `;
