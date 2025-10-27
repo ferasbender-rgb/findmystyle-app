@@ -1,7 +1,7 @@
 {
   "name": "findmystyle-app",
-  "version": "1.0.0",
-  "description": "Fashion product finder app",
+  "version": "2.0.0",
+  "description": "Automatische Fashion Produktsuche mit Bildanalyse",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,7 +13,7 @@
     "jsdom": "^22.0.0",
     "cors": "^2.8.5"
   },
-  "keywords": ["fashion", "product-search"],
+  "keywords": ["fashion", "image-search", "product-finder"],
   "author": "Dein Name",
   "license": "MIT"
 }
