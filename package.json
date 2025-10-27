@@ -1,11 +1,35 @@
 {
   "name": "findmystyle-app",
-  "version": "1.0.0",
+  "version": "3.0.0",
+  "description": "Professioneller deutscher Mode-Preisvergleich - Finde die besten Angebote in deutschen Online-Shops",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "keywords": [
+    "preisvergleich",
+    "mode",
+    "deutschland",
+    "online-shops",
+    "fashion",
+    "shopping",
+    "affiliate",
+    "zalando",
+    "amazon",
+    "aboutyou"
+  ],
+  "author": "Dein Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ferasbender-rgb/findmystyle-app"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
