@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Shops-Datenbank mit allen 15 Shops
+// Shops-Datenbank mit TAGS
 const SHOPS_DATA = [
   {
     id: 1,
@@ -18,6 +18,7 @@ const SHOPS_DATA = [
     url: "https://www.zalando.de",
     affiliate_link: "https://www.zalando.de/?partner=IHRE_ID",
     categories: ["Allrounder", "Bekleidung", "Schuhe"],
+    tags: ["allrounder", "marken", "schuhe", "bekleidung", "retouren", "große-auswahl"],
     rating: 4.8,
     shipping: "Kostenlos ab 29€",
     return_days: 100,
@@ -30,6 +31,7 @@ const SHOPS_DATA = [
     url: "https://www.aboutyou.de",
     affiliate_link: "https://www.aboutyou.de/?partner=IHRE_ID",
     categories: ["Allrounder", "Junge Mode", "Streetwear"],
+    tags: ["junge-mode", "personalisiert", "streetwear", "trends", "influencer"],
     rating: 4.7,
     shipping: "Kostenlos ab 29€",
     return_days: 30,
@@ -42,6 +44,7 @@ const SHOPS_DATA = [
     url: "https://www.otto.de",
     affiliate_link: "https://www.otto.de/?partner=IHRE_ID",
     categories: ["Allrounder", "Familie", "Haushalt"],
+    tags: ["familie", "haushalt", "tradition", "versandhaus", "allrounder"],
     rating: 4.5,
     shipping: "Kostenlos ab 50€",
     return_days: 30,
@@ -54,6 +57,7 @@ const SHOPS_DATA = [
     url: "https://www2.hm.com/de_de",
     affiliate_link: "https://www2.hm.com/de_de/?partner=IHRE_ID",
     categories: ["Allrounder", "Fast Fashion", "Basic"],
+    tags: ["fast-fashion", "günstig", "basic", "nachhaltig", "family"],
     rating: 4.3,
     shipping: "Kostenlos ab 29€",
     return_days: 30,
@@ -66,6 +70,7 @@ const SHOPS_DATA = [
     url: "https://www.amazon.de/fashion",
     affiliate_link: "https://www.amazon.de/fashion/?tag=IHRE_ID",
     categories: ["Allrounder", "Marketplace", "Verschiedene"],
+    tags: ["marketplace", "schnell-lieferung", "prime", "vielfalt", "allrounder"],
     rating: 4.6,
     shipping: "Prime: Kostenlos 1-Tag",
     return_days: 30,
@@ -78,6 +83,7 @@ const SHOPS_DATA = [
     url: "https://www.snipes.com",
     affiliate_link: "https://www.snipes.com/?partner=IHRE_ID",
     categories: ["Sport", "Streetwear", "Sneaker"],
+    tags: ["sneaker", "streetwear", "sport", "marken", "urban"],
     rating: 4.4,
     shipping: "Kostenlos ab 50€",
     return_days: 30,
@@ -90,6 +96,7 @@ const SHOPS_DATA = [
     url: "https://www.asos.com/de",
     affiliate_link: "https://www.asos.com/de/?partner=IHRE_ID",
     categories: ["Allrounder", "Junge Mode", "International"],
+    tags: ["british", "junge-mode", "international", "trends", "plus-size"],
     rating: 4.2,
     shipping: "Kostenlos ab 25€",
     return_days: 28,
@@ -102,6 +109,7 @@ const SHOPS_DATA = [
     url: "https://www.urbanoutfitters.com/de",
     affiliate_link: "https://www.urbanoutfitters.com/de/?partner=IHRE_ID",
     categories: ["Premium", "Hipster", "Lifestyle"],
+    tags: ["hipster", "lifestyle", "design", "wohnen", "premium"],
     rating: 4.1,
     shipping: "Kostenlos ab 50€",
     return_days: 30,
@@ -114,6 +122,7 @@ const SHOPS_DATA = [
     url: "https://www.breuninger.com",
     affiliate_link: "https://www.breuninger.com/?partner=IHRE_ID",
     categories: ["Premium", "Luxus", "Designer"],
+    tags: ["luxus", "designer", "premium", "kaufhaus", "exklusiv"],
     rating: 4.7,
     shipping: "Kostenlos ab 100€",
     return_days: 30,
@@ -126,6 +135,7 @@ const SHOPS_DATA = [
     url: "https://www.mytheresa.com/de-de",
     affiliate_link: "https://www.mytheresa.com/de-de/?partner=IHRE_ID",
     categories: ["Premium", "Luxus", "Designer"],
+    tags: ["luxus", "designer", "high-fashion", "damen", "exklusiv"],
     rating: 4.8,
     shipping: "Kostenlos",
     return_days: 30,
@@ -138,6 +148,7 @@ const SHOPS_DATA = [
     url: "https://www.luisaviaroma.com/de-de",
     affiliate_link: "https://www.luisaviaroma.com/de-de/?partner=IHRE_ID",
     categories: ["Premium", "Luxus", "Designer"],
+    tags: ["luxus", "italienisch", "designer", "high-end", "international"],
     rating: 4.6,
     shipping: "Kostenlos ab 500€",
     return_days: 14,
@@ -150,6 +161,7 @@ const SHOPS_DATA = [
     url: "https://www.deichmann.com",
     affiliate_link: "https://www.deichmann.com/?partner=IHRE_ID",
     categories: ["Schuhe", "Günstig", "Familie"],
+    tags: ["schuhe", "günstig", "familie", "sport", "accessoires"],
     rating: 4.3,
     shipping: "Kostenlos ab 30€",
     return_days: 30,
@@ -162,6 +174,7 @@ const SHOPS_DATA = [
     url: "https://www.taschen.com/de",
     affiliate_link: "https://www.taschen.com/de/?partner=IHRE_ID",
     categories: ["Accessoires", "Luxus", "Taschen"],
+    tags: ["accessoires", "luxus", "leder", "marken", "qualität"],
     rating: 4.5,
     shipping: "Kostenlos ab 200€",
     return_days: 14,
@@ -174,6 +187,7 @@ const SHOPS_DATA = [
     url: "https://www.sephora.de",
     affiliate_link: "https://www.sephora.de/?partner=IHRE_ID",
     categories: ["Beauty", "Accessoires", "Pflege"],
+    tags: ["beauty", "kosmetik", "pflege", "luxus", "marken"],
     rating: 4.4,
     shipping: "Kostenlos ab 25€",
     return_days: 30,
@@ -186,6 +200,7 @@ const SHOPS_DATA = [
     url: "https://www.mediamarkt.de",
     affiliate_link: "https://www.mediamarkt.de/?partner=IHRE_ID",
     categories: ["Elektronik", "Wearables", "Smartwatches"],
+    tags: ["elektronik", "wearables", "smartwatch", "technik", "schnell-lieferung"],
     rating: 4.2,
     shipping: "Kostenlos ab 100€",
     return_days: 30,
@@ -209,20 +224,28 @@ app.get('/api/shops/category/:category', (req, res) => {
   res.json(filteredShops);
 });
 
+// ERWEITERTE SUCHE mit Tags
 app.get('/api/shops/search', (req, res) => {
   const query = req.query.q.toLowerCase();
   
   const results = SHOPS_DATA.map(shop => {
     let score = 0;
     
-    // Name matching
-    if (shop.name.toLowerCase().includes(query)) score += 10;
+    // Name matching (höchste Priorität)
+    if (shop.name.toLowerCase().includes(query)) score += 15;
     
     // Category matching
-    if (shop.categories.some(cat => cat.toLowerCase().includes(query))) score += 3;
+    if (shop.categories.some(cat => cat.toLowerCase().includes(query))) score += 5;
+    
+    // Tags matching (neue Gewichtung)
+    if (shop.tags.some(tag => tag.toLowerCase().includes(query))) score += 4;
     
     // Description matching
     if (shop.description.toLowerCase().includes(query)) score += 2;
+    
+    // Exact match Bonuspunkte
+    if (shop.name.toLowerCase() === query) score += 10;
+    if (shop.tags.some(tag => tag === query)) score += 8;
     
     return { shop, score };
   })
