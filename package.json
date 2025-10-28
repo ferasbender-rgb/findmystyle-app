@@ -1,36 +1,21 @@
 {
-  "name": "findmystyle-app",
-  "version": "4.0.0",
-  "description": "Intelligenter deutscher Mode-Preisvergleich mit KI-gestützter Suche - Finde die besten Angebote basierend auf Suchintent",
+  "name": "fashion-shop-comparison",
+  "version": "1.0.0",
+  "description": "Mobile App für Mode-Shop-Vergleich in Deutschland",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "path": "^0.12.7"
   },
-  "keywords": [
-    "ki",
-    "preisvergleich",
-    "mode",
-    "deutschland",
-    "intelligente-suche",
-    "fashion",
-    "shopping",
-    "affiliate",
-    "zalando",
-    "amazon",
-    "aboutyou"
-  ],
-  "author": "Dein Name",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ferasbender-rgb/findmystyle-app"
+  "devDependencies": {
+    "nodemon": "^2.0.0"
   },
-  "engines": {
-    "node": ">=14.0.0"
-  }
+  "keywords": ["fashion", "comparison", "shopping", "affiliate"],
+  "author": "Ihr Name",
+  "license": "MIT"
 }
