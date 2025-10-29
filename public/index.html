@@ -3,47 +3,453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fashion Shop Vergleich - Einfach & Schnell</title>
+    <title>Fashion Curator - Handverlesene Mode-Kollektionen</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
-        header { background: white; padding: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .logo { font-size: 24px; font-weight: bold; color: #e91e63; text-align: center; margin-bottom: 20px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
         
-        .search-box { max-width: 500px; margin: 0 auto 20px; }
-        .search-box input { width: 100%; padding: 12px 20px; border: 2px solid #ddd; border-radius: 25px; font-size: 16px; }
-        .search-box input:focus { border-color: #e91e63; outline: none; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
         
-        .categories { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .category-btn { padding: 8px 16px; background: white; border: 2px solid #ddd; border-radius: 20px; cursor: pointer; }
-        .category-btn.active, .category-btn:hover { background: #e91e63; color: white; border-color: #e91e63; }
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-radius: 0 0 20px 20px;
+        }
         
-        .shops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .shop-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .shop-header { display: flex; align-items: center; margin-bottom: 15px; }
-        .shop-logo { width: 50px; height: 50px; background: #f0f0f0; border-radius: 8px; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .shop-name { font-size: 18px; font-weight: bold; }
-        .shop-rating { color: #ffc107; margin: 5px 0; }
-        .shop-categories { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-        .shop-category { background: #f0f0f0; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-        .shop-shipping { color: #666; font-size: 14px; margin-bottom: 10px; }
-        .shop-description { color: #666; font-size: 14px; margin-bottom: 15px; }
-        .shop-link { display: block; background: #e91e63; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; text-align: center; }
-        .shop-link:hover { background: #c2185b; }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 20px;
+        }
         
-        .loading, .error { text-align: center; padding: 40px; }
-        .error { color: #f44336; }
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .search-box input:focus {
+            border-color: #e91e63;
+            box-shadow: 0 0 20px rgba(233, 30, 99, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+        
+        .premium-features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .feature-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .category-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .category-btn.active,
+        .category-btn:hover {
+            background: #e91e63;
+            color: white;
+            border-color: #e91e63;
+        }
+        
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        
+        .collection-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+        
+        .collection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .collection-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .collection-icon {
+            font-size: 40px;
+            margin-right: 15px;
+        }
+        
+        .collection-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .collection-category {
+            background: #e91e63;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        
+        .collection-description {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        
+        .collection-products {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        
+        .product-tag {
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .collection-shops {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .shop-pills {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .shop-pill {
+            background: #e3f2fd;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+        
+        .shops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .shop-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .shop-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .shop-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .shop-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 20px;
+        }
+        
+        .shop-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .shop-rating {
+            color: #ffc107;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .shop-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+        
+        .shop-category {
+            background: #f5f5f5;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .shop-details {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .shop-link {
+            display: block;
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .shop-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.4);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: #f44336;
+            background: white;
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+
+        .search-suggestions {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .suggestion-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #e91e63;
+        }
+
+        /* Feedback Styles */
+        #feedbackButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e91e63;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        #feedbackButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
+        }
+
+        #feedbackModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .feedback-rating {
+            padding: 15px;
+            border: 2px solid #ddd;
+            background: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .feedback-rating:hover {
+            border-color: #e91e63;
+            transform: scale(1.1);
+        }
+
+        #feedbackComment {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        #feedbackComment:focus {
+            border-color: #e91e63;
+            outline: none;
+        }
+
+        #thankYouMessage {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 3000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="logo">🛍️ Fashion Shop Vergleich</div>
+            <div class="logo">🎨 Fashion Curator - Handverlesene Kollektionen</div>
+            
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Shops suchen...">
+                <input type="text" id="searchInput" placeholder="Was suchst du? Z.B. 'Winter', 'Geschenke', 'Business'...">
+                <div class="search-icon">🔍</div>
             </div>
+            
+            <div class="premium-features">
+                <button class="feature-btn" onclick="showAllCollections()">
+                    📚 Alle Kollektionen
+                </button>
+                <button class="feature-btn" onclick="showPersonalizedRecommendations()">
+                    👤 Für mich kuratiert
+                </button>
+                <button class="feature-btn" onclick="showSeasonalCollections()">
+                    ❄️ Winter Edition
+                </button>
+            </div>
+
             <div class="categories">
                 <button class="category-btn active" data-category="all">Alle Shops</button>
                 <button class="category-btn" data-category="Allrounder">Allrounder</button>
@@ -56,32 +462,137 @@
     </header>
     
     <div class="container">
-        <div id="shopsContainer" class="shops-grid">
-            <div class="loading">Lade Shops...</div>
+        <!-- Suchvorschläge -->
+        <div id="searchSuggestions" class="search-suggestions" style="display: none;">
+            <div class="suggestion-title">💡 Such-Tipps:</div>
+            <div>Versuche: "Winter", "Geschenke", "Streetwear", "Luxus", "Business", "Nachhaltig"</div>
+        </div>
+
+        <!-- Featured Collections -->
+        <div id="collectionsContainer" class="collections-grid">
+            <div class="loading">Lade handverlesene Kollektionen...</div>
+        </div>
+
+        <!-- Shops Grid -->
+        <div id="shopsContainer" class="shops-grid" style="display: none;"></div>
+    </div>
+
+    <!-- Feedback System -->
+    <div id="feedbackButton">💬 Feedback</div>
+
+    <div id="feedbackModal">
+        <div class="feedback-modal-content">
+            <h3 style="margin-bottom:20px; color:#e91e63;">💡 Dein Feedback hilft uns!</h3>
+            
+            <div style="margin-bottom:20px;">
+                <div style="font-weight:bold; margin-bottom:10px;">Wie gefällt dir die App?</div>
+                <div style="display:flex; gap:10px; margin-bottom:20px; justify-content: center;">
+                    <button class="feedback-rating" data-rating="1">😞</button>
+                    <button class="feedback-rating" data-rating="2">😐</button>
+                    <button class="feedback-rating" data-rating="3">😊</button>
+                    <button class="feedback-rating" data-rating="4">😍</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <div style="font-weight:bold; margin-bottom:10px;">Was können wir verbessern? (optional)</div>
+                <textarea id="feedbackComment" placeholder="Deine Ideen und Vorschläge..."></textarea>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button onclick="closeFeedback()" style="padding:10px 20px; border:1px solid #ddd; background:none; border-radius:8px; cursor:pointer;">Abbrechen</button>
+                <button onclick="submitFeedback()" style="padding:10px 20px; background:#e91e63; color:white; border:none; border-radius:8px; cursor:pointer;">Feedback senden</button>
+            </div>
         </div>
     </div>
 
+    <div id="thankYouMessage">✅ Danke für dein Feedback!</div>
+
     <script>
+        let allCollections = [];
         let allShops = [];
-        
-        async function loadShops() {
+        let currentRating = 0;
+
+        // Collections laden
+        async function loadCollections() {
             try {
-                const response = await fetch('/api/shops');
-                allShops = await response.json();
-                displayShops(allShops);
+                const response = await fetch('/api/collections');
+                allCollections = await response.json();
+                displayCollections(allCollections);
+                
+                const shopsResponse = await fetch('/api/shops');
+                allShops = await shopsResponse.json();
             } catch (error) {
-                document.getElementById('shopsContainer').innerHTML = '<div class="error">Fehler beim Laden</div>';
+                document.getElementById('collectionsContainer').innerHTML = 
+                    '<div class="error">Fehler beim Laden der Kollektionen</div>';
             }
         }
-        
+
+        // Collections anzeigen
+        function displayCollections(collections) {
+            const container = document.getElementById('collectionsContainer');
+            
+            container.innerHTML = collections.map(collection => `
+                <div class="collection-card" onclick="showCollectionShops(${collection.id})">
+                    <div class="collection-header">
+                        <div class="collection-icon">${collection.image}</div>
+                        <div>
+                            <div class="collection-title">${collection.title}</div>
+                            <div class="collection-category">${collection.category}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="collection-description">
+                        ${collection.description}
+                    </div>
+                    
+                    <div class="collection-products">
+                        ${collection.featuredProducts.map(product => 
+                            `<span class="product-tag">${product}</span>`
+                        ).join('')}
+                    </div>
+                    
+                    <div class="collection-shops">
+                        <span>Enthaltene Shops:</span>
+                        <div class="shop-pills">
+                            ${collection.shops.map(shopId => {
+                                const shop = allShops.find(s => s.id === shopId);
+                                return shop ? `<span class="shop-pill">${shop.name}</span>` : '';
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Shops einer Collection anzeigen
+        async function showCollectionShops(collectionId) {
+            try {
+                const response = await fetch(`/api/collections/${collectionId}`);
+                const collection = await response.json();
+                displayShops(collection.shops);
+                
+                document.getElementById('collectionsContainer').style.display = 'none';
+                document.getElementById('shopsContainer').style.display = 'grid';
+                
+                const backBtn = `<button onclick="showAllCollections()" style="margin-bottom: 20px; padding: 10px 20px; background: #666; color: white; border: none; border-radius: 10px; cursor: pointer;">← Zurück zu Kollektionen</button>`;
+                document.getElementById('shopsContainer').innerHTML = backBtn + document.getElementById('shopsContainer').innerHTML;
+                
+            } catch (error) {
+                console.error('Fehler beim Laden der Collection:', error);
+            }
+        }
+
+        // Shops anzeigen
         function displayShops(shops) {
             const container = document.getElementById('shopsContainer');
+            
             if (shops.length === 0) {
-                container.innerHTML = '<div class="error">Keine Shops gefunden</div>';
+                container.innerHTML += '<div class="error">Keine Shops gefunden</div>';
                 return;
             }
             
-            container.innerHTML = shops.map(shop => `
+            container.innerHTML += shops.map(shop => `
                 <div class="shop-card">
                     <div class="shop-header">
                         <div class="shop-logo">${shop.name.charAt(0)}</div>
@@ -90,51 +601,197 @@
                             <div class="shop-rating">⭐ ${shop.rating}/5</div>
                         </div>
                     </div>
+                    
                     <div class="shop-categories">
-                        ${shop.categories.map(cat => `<span class="shop-category">${cat}</span>`).join('')}
+                        ${shop.categories.map(cat => 
+                            `<span class="shop-category">${cat}</span>`
+                        ).join('')}
                     </div>
-                    <div class="shop-shipping">🚚 ${shop.shipping} | ↩️ ${shop.return_days} Tage</div>
-                    <div class="shop-description">${shop.description}</div>
-                    <a href="${shop.affiliate_link}" target="_blank" class="shop-link">Zum Shop ➔</a>
+                    
+                    <div class="shop-details">
+                        ${shop.description}
+                    </div>
+                    
+                    <a href="${shop.affiliate_link}" target="_blank" class="shop-link">
+                        Zum Shop ➔
+                    </a>
                 </div>
             `).join('');
         }
-        
-        document.getElementById('searchInput').addEventListener('input', async (e) => {
-            const query = e.target.value.trim();
-            if (query.length === 0) {
-                displayShops(allShops);
-                return;
-            }
+
+        // Alle Collections anzeigen
+        function showAllCollections() {
+            document.getElementById('shopsContainer').style.display = 'none';
+            document.getElementById('collectionsContainer').style.display = 'grid';
+            document.getElementById('shopsContainer').innerHTML = '';
+            displayCollections(allCollections);
+        }
+
+        // Smart Search
+        async function performSmartSearch(query) {
             try {
-                const response = await fetch(`/api/shops/search?q=${encodeURIComponent(query)}`);
-                const results = await response.json();
-                displayShops(results);
+                const response = await fetch(`/api/smart-search/${encodeURIComponent(query)}`);
+                const result = await response.json();
+                
+                if (result.type === "collection_match") {
+                    displayCollections(result.results);
+                    document.getElementById('searchSuggestions').style.display = 'none';
+                } else {
+                    document.getElementById('searchSuggestions').style.display = 'block';
+                }
             } catch (error) {
                 console.error('Suche fehlgeschlagen:', error);
             }
+        }
+
+        // Feature Functions
+        function showPersonalizedRecommendations() {
+            alert('👤 Persönliche Empfehlungen - Coming Soon!');
+        }
+
+        function showSeasonalCollections() {
+            const winterCollections = allCollections.filter(c => 
+                c.title.includes('Winter') || c.title.includes('Weihnachten')
+            );
+            if (winterCollections.length > 0) {
+                displayCollections(winterCollections);
+            }
+        }
+
+        // Feedback System
+        function openFeedback() {
+            document.getElementById('feedbackModal').style.display = 'flex';
+        }
+
+        function closeFeedback() {
+            document.getElementById('feedbackModal').style.display = 'none';
+            resetFeedback();
+        }
+
+        function resetFeedback() {
+            currentRating = 0;
+            document.getElementById('feedbackComment').value = '';
+            document.querySelectorAll('.feedback-rating').forEach(btn => {
+                btn.style.background = 'none';
+                btn.style.borderColor = '#ddd';
+                btn.style.color = 'inherit';
+            });
+        }
+
+        // Rating Buttons
+        document.querySelectorAll('.feedback-rating').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentRating = parseInt(this.dataset.rating);
+                
+                document.querySelectorAll('.feedback-rating').forEach(b => {
+                    b.style.background = 'none';
+                    b.style.borderColor = '#ddd';
+                    b.style.color = 'inherit';
+                });
+                
+                this.style.background = '#e91e63';
+                this.style.borderColor = '#e91e63';
+                this.style.color = 'white';
+            });
         });
-        
+
+        // Submit Feedback
+        function submitFeedback() {
+            const comment = document.getElementById('feedbackComment').value;
+            
+            if (currentRating === 0) {
+                alert('Bitte gebe eine Bewertung ab!');
+                return;
+            }
+
+            fetch('/api/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rating: currentRating,
+                    comment: comment,
+                    page: window.location.href,
+                    userAgent: navigator.userAgent
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('feedbackModal').style.display = 'none';
+                document.getElementById('thankYouMessage').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('thankYouMessage').style.display = 'none';
+                }, 3000);
+
+                resetFeedback();
+            })
+            .catch(error => {
+                console.error('Fehler beim Senden des Feedbacks:', error);
+                document.getElementById('feedbackModal').style.display = 'none';
+                document.getElementById('thankYouMessage').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('thankYouMessage').style.display = 'none';
+                }, 3000);
+                resetFeedback();
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            
+            if (query.length === 0) {
+                document.getElementById('searchSuggestions').style.display = 'none';
+                showAllCollections();
+                return;
+            }
+            
+            if (query.length < 2) return;
+            
+            performSmartSearch(query);
+        });
+
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                
                 const category = btn.dataset.category;
+                
                 if (category === 'all') {
-                    displayShops(allShops);
+                    showAllCollections();
                     return;
                 }
+                
                 try {
                     const response = await fetch(`/api/shops/category/${category}`);
                     const shops = await response.json();
+                    
+                    document.getElementById('collectionsContainer').style.display = 'none';
+                    document.getElementById('shopsContainer').style.display = 'grid';
+                    document.getElementById('shopsContainer').innerHTML = '';
                     displayShops(shops);
+                    
                 } catch (error) {
                     console.error('Filter fehlgeschlagen:', error);
                 }
             });
         });
-        
-        loadShops();
+
+        // Feedback Button
+        document.getElementById('feedbackButton').addEventListener('click', openFeedback);
+
+        // Klick außerhalb vom Modal schließt es
+        document.getElementById('feedbackModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedback();
+            }
+        });
+
+        // App starten
+        loadCollections();
     </script>
 </body>
 </html>
