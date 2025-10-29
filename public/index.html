@@ -3,283 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fashion Curator - Handverlesene Mode-Kollektionen</title>
+    <title>Fashion Shop Vergleich - Einfach & Schnell</title>
     <style>
-        /* Basis-Styles wie zuvor bleiben */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
-        .collections-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin: 25px 0;
-        }
+        header { background: white; padding: 20px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logo { font-size: 24px; font-weight: bold; color: #e91e63; text-align: center; margin-bottom: 20px; }
         
-        .collection-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-        }
+        .search-box { max-width: 500px; margin: 0 auto 20px; }
+        .search-box input { width: 100%; padding: 12px 20px; border: 2px solid #ddd; border-radius: 25px; font-size: 16px; }
+        .search-box input:focus { border-color: #e91e63; outline: none; }
         
-        .collection-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-        }
+        .categories { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .category-btn { padding: 8px 16px; background: white; border: 2px solid #ddd; border-radius: 20px; cursor: pointer; }
+        .category-btn.active, .category-btn:hover { background: #e91e63; color: white; border-color: #e91e63; }
         
-        .collection-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+        .shops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .shop-card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .shop-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .shop-logo { width: 50px; height: 50px; background: #f0f0f0; border-radius: 8px; margin-right: 15px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .shop-name { font-size: 18px; font-weight: bold; }
+        .shop-rating { color: #ffc107; margin: 5px 0; }
+        .shop-categories { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+        .shop-category { background: #f0f0f0; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+        .shop-shipping { color: #666; font-size: 14px; margin-bottom: 10px; }
+        .shop-description { color: #666; font-size: 14px; margin-bottom: 15px; }
+        .shop-link { display: block; background: #e91e63; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; text-align: center; }
+        .shop-link:hover { background: #c2185b; }
         
-        .collection-icon {
-            font-size: 40px;
-            margin-right: 15px;
-        }
-        
-        .collection-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .collection-category {
-            background: #e91e63;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            display: inline-block;
-        }
-        
-        .collection-description {
-            color: #666;
-            margin: 10px 0;
-            line-height: 1.5;
-        }
-        
-        .collection-products {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        
-        .product-tag {
-            background: #f5f5f5;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .collection-shops {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .shop-pills {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .shop-pill {
-            background: #e3f2fd;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-        }
-        
-        .search-suggestions {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        .suggestion-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #e91e63;
-        }
+        .loading, .error { text-align: center; padding: 40px; }
+        .error { color: #f44336; }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <div class="logo">🎨 Fashion Curator - Handverlesene Kollektionen</div>
-            
+            <div class="logo">🛍️ Fashion Shop Vergleich</div>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Was suchst du? Z.B. 'Winter', 'Geschenke', 'Business'...">
-                <div class="search-icon">🔍</div>
+                <input type="text" id="searchInput" placeholder="Shops suchen...">
             </div>
-            
-            <div class="premium-features">
-                <button class="feature-btn" onclick="showAllCollections()">
-                    📚 Alle Kollektionen
-                </button>
-                <button class="feature-btn" onclick="showPersonalizedRecommendations()">
-                    👤 Für mich kuratiert
-                </button>
-                <button class="feature-btn" onclick="showSeasonalCollections()">
-                    ❄️ Winter Edition
-                </button>
+            <div class="categories">
+                <button class="category-btn active" data-category="all">Alle Shops</button>
+                <button class="category-btn" data-category="Allrounder">Allrounder</button>
+                <button class="category-btn" data-category="Premium">Premium</button>
+                <button class="category-btn" data-category="Sport">Sport</button>
+                <button class="category-btn" data-category="Schuhe">Schuhe</button>
+                <button class="category-btn" data-category="Beauty">Beauty</button>
             </div>
         </div>
     </header>
     
     <div class="container">
-        <!-- Suchvorschläge -->
-        <div id="searchSuggestions" class="search-suggestions" style="display: none;">
-            <div class="suggestion-title">💡 Such-Tipps:</div>
-            <div>Versuche: "Winter", "Geschenke", "Streetwear", "Luxus", "Business", "Nachhaltig"</div>
+        <div id="shopsContainer" class="shops-grid">
+            <div class="loading">Lade Shops...</div>
         </div>
-
-        <!-- Featured Collections -->
-        <div id="collectionsContainer" class="collections-grid">
-            <div class="loading">Lade handverlesene Kollektionen...</div>
-        </div>
-
-        <!-- Shops Grid (wird bei Collection-Klick angezeigt) -->
-        <div id="shopsContainer" class="shops-grid" style="display: none;"></div>
     </div>
 
     <script>
-        let allCollections = [];
         let allShops = [];
-
-        // Collections laden
-        async function loadCollections() {
+        
+        async function loadShops() {
             try {
-                const response = await fetch('/api/collections');
-                allCollections = await response.json();
-                displayCollections(allCollections);
-                
-                // Shops auch laden für später
-                const shopsResponse = await fetch('/api/shops');
-                allShops = await shopsResponse.json();
+                const response = await fetch('/api/shops');
+                allShops = await response.json();
+                displayShops(allShops);
             } catch (error) {
-                document.getElementById('collectionsContainer').innerHTML = 
-                    '<div class="error">Fehler beim Laden der Kollektionen</div>';
+                document.getElementById('shopsContainer').innerHTML = '<div class="error">Fehler beim Laden</div>';
             }
         }
-
-        // Collections anzeigen
-        function displayCollections(collections) {
-            const container = document.getElementById('collectionsContainer');
-            
-            container.innerHTML = collections.map(collection => `
-                <div class="collection-card" onclick="showCollectionShops(${collection.id})">
-                    <div class="collection-header">
-                        <div class="collection-icon">${collection.image}</div>
-                        <div>
-                            <div class="collection-title">${collection.title}</div>
-                            <div class="collection-category">${collection.category}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="collection-description">
-                        ${collection.description}
-                    </div>
-                    
-                    <div class="collection-products">
-                        ${collection.featuredProducts.map(product => 
-                            `<span class="product-tag">${product}</span>`
-                        ).join('')}
-                    </div>
-                    
-                    <div class="collection-shops">
-                        <span>Enthaltene Shops:</span>
-                        <div class="shop-pills">
-                            ${collection.shops.map(shopId => {
-                                const shop = allShops.find(s => s.id === shopId);
-                                return shop ? `<span class="shop-pill">${shop.name}</span>` : '';
-                            }).join('')}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Shops einer Collection anzeigen
-        async function showCollectionShops(collectionId) {
-            try {
-                const response = await fetch(`/api/collections/${collectionId}`);
-                const collection = await response.json();
-                
-                // Zeige Shops dieser Collection
-                displayShops(collection.shops);
-                
-                // Verstecke Collections, zeige Shops
-                document.getElementById('collectionsContainer').style.display = 'none';
-                document.getElementById('shopsContainer').style.display = 'grid';
-                
-                // Setze Back Button
-                const backBtn = `<button onclick="showAllCollections()" style="margin-bottom: 20px; padding: 10px 20px; background: #666; color: white; border: none; border-radius: 10px; cursor: pointer;">← Zurück zu Kollektionen</button>`;
-                document.getElementById('shopsContainer').innerHTML = backBtn + document.getElementById('shopsContainer').innerHTML;
-                
-            } catch (error) {
-                console.error('Fehler beim Laden der Collection:', error);
-            }
-        }
-
-        // Alle Collections anzeigen
-        function showAllCollections() {
-            document.getElementById('shopsContainer').style.display = 'none';
-            document.getElementById('collectionsContainer').style.display = 'grid';
-            displayCollections(allCollections);
-        }
-
-        // Smart Search
-        async function performSmartSearch(query) {
-            try {
-                const response = await fetch(`/api/smart-search/${encodeURIComponent(query)}`);
-                const result = await response.json();
-                
-                if (result.type === "collection_match") {
-                    // Zeige passende Collections
-                    displayCollections(result.results);
-                    document.getElementById('searchSuggestions').style.display = 'none';
-                } else {
-                    // Zeige Suchvorschläge
-                    document.getElementById('searchSuggestions').style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Suche fehlgeschlagen:', error);
-            }
-        }
-
-        // Shops anzeigen (wie zuvor)
+        
         function displayShops(shops) {
             const container = document.getElementById('shopsContainer');
-            // ... Shop-Card Code wie zuvor ...
-        }
-
-        // Event Listeners
-        document.getElementById('searchInput').addEventListener('input', async (e) => {
-            const query = e.target.value.trim();
-            
-            if (query.length === 0) {
-                document.getElementById('searchSuggestions').style.display = 'none';
-                showAllCollections();
+            if (shops.length === 0) {
+                container.innerHTML = '<div class="error">Keine Shops gefunden</div>';
                 return;
             }
             
-            if (query.length < 2) return;
-            
-            performSmartSearch(query);
+            container.innerHTML = shops.map(shop => `
+                <div class="shop-card">
+                    <div class="shop-header">
+                        <div class="shop-logo">${shop.name.charAt(0)}</div>
+                        <div>
+                            <div class="shop-name">${shop.name}</div>
+                            <div class="shop-rating">⭐ ${shop.rating}/5</div>
+                        </div>
+                    </div>
+                    <div class="shop-categories">
+                        ${shop.categories.map(cat => `<span class="shop-category">${cat}</span>`).join('')}
+                    </div>
+                    <div class="shop-shipping">🚚 ${shop.shipping} | ↩️ ${shop.return_days} Tage</div>
+                    <div class="shop-description">${shop.description}</div>
+                    <a href="${shop.affiliate_link}" target="_blank" class="shop-link">Zum Shop ➔</a>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if (query.length === 0) {
+                displayShops(allShops);
+                return;
+            }
+            try {
+                const response = await fetch(`/api/shops/search?q=${encodeURIComponent(query)}`);
+                const results = await response.json();
+                displayShops(results);
+            } catch (error) {
+                console.error('Suche fehlgeschlagen:', error);
+            }
         });
-
-        // App starten
-        loadCollections();
+        
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const category = btn.dataset.category;
+                if (category === 'all') {
+                    displayShops(allShops);
+                    return;
+                }
+                try {
+                    const response = await fetch(`/api/shops/category/${category}`);
+                    const shops = await response.json();
+                    displayShops(shops);
+                } catch (error) {
+                    console.error('Filter fehlgeschlagen:', error);
+                }
+            });
+        });
+        
+        loadShops();
     </script>
 </body>
 </html>
